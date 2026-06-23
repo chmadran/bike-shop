@@ -11,9 +11,7 @@ export function SiteHeader({
   locale: Locale
 }) {
   const nav = [
-    { label: dict.header.nav.bikes, href: '#bikes' },
-    { label: dict.header.nav.features, href: '#features' },
-    { label: dict.header.nav.faq, href: '#faq' },
+    { },
   ]
 
   return (
@@ -41,17 +39,7 @@ export function SiteHeader({
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 sm:flex">
-          {nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+       
 
         <div className="flex items-center gap-3">
           <LanguageToggle locale={locale} label={dict.header.switchLabel} />

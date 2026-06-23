@@ -10,13 +10,14 @@ function pathnameHasLocale(pathname: string) {
   )
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip Next internals, API routes, and static files.
+  // Skip Next internals, API routes, eve agent routes, and static files.
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
+    pathname.startsWith('/eve/') ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next()

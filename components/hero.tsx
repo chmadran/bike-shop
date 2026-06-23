@@ -23,18 +23,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
               {hero.subtitle}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-3">
-              <a
-                href="#bikes"
-                className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-              >
-                {hero.browse}
-              </a>
-              <a
-                href="#faq"
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-              >
-                {hero.readFaq}
-              </a>
+
             </div>
 
             <dl className="mt-6 grid w-full max-w-md grid-cols-3 gap-4 border-t border-border pt-6">

@@ -19,8 +19,6 @@ export type Dictionary = {
     badge: string
     title: string
     subtitle: string
-    browse: string
-    readFaq: string
     stats: {
       models: { label: string; value: string }
       warranty: { label: string; value: string }
@@ -68,8 +66,6 @@ const en: Dictionary = {
     title: 'Bikes engineered for the details.',
     subtitle:
       'Vur Selle builds precision road, mountain, city, and electric bikes. Thoughtfully specced, ready to ride, and backed by a team that actually rides.',
-    browse: 'Browse bikes',
-    readFaq: 'Read the FAQ',
     stats: {
       models: { label: 'Models', value: '4' },
       warranty: { label: 'Warranty', value: 'Lifetime' },
@@ -188,8 +184,6 @@ const fr: Dictionary = {
     title: 'Des vélos pensés dans le moindre détail.',
     subtitle:
       'Vur Selle conçoit des vélos de route, VTT, urbains et électriques de précision. Équipement soigné, prêts à rouler, et soutenus par une équipe qui roule vraiment.',
-    browse: 'Voir les vélos',
-    readFaq: 'Lire la FAQ',
     stats: {
       models: { label: 'Modèles', value: '4' },
       warranty: { label: 'Garantie', value: 'À vie' },
