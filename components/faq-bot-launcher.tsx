@@ -10,6 +10,35 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 type Message = { id: string; role: 'user' | 'assistant'; text: string }
 type Status = 'idle' | 'loading' | 'streaming'
 
+function BikeLoader() {
+  return (
+    <svg
+      viewBox="0 0 64 32"
+      className="h-5 w-10"
+      aria-label="Thinking…"
+    >
+      {/* Rear wheel */}
+      <circle cx="12" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
+      {/* Front wheel */}
+      <circle cx="52" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
+      {/* Frame */}
+      <polyline points="12,22 24,8 36,8 52,22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="24" y1="8" x2="28" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Saddle */}
+      <line x1="33" y1="8" x2="40" y2="8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      {/* Handlebar */}
+      <line x1="48" y1="10" x2="55" y2="10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="52" y1="10" x2="52" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Animated road dots */}
+      <circle cx="4"  cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_0ms]" />
+      <circle cx="18" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_150ms]" />
+      <circle cx="32" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_300ms]" />
+      <circle cx="46" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_450ms]" />
+      <circle cx="60" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_600ms]" />
+    </svg>
+  )
+}
+
 function useEveChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<Status>('idle')
@@ -177,29 +206,32 @@ export function FaqBotLauncher() {
               </p>
             )}
 
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages.map((msg) => {
+              const isEmpty = msg.role === 'assistant' && msg.text === ''
+              // Don't render the empty assistant placeholder — show the loader instead.
+              if (isEmpty) return null
+              return (
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-foreground text-background'
-                      : 'bg-muted text-foreground'
-                  }`}
+                  key={msg.id}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <span className="whitespace-pre-wrap">{msg.text}</span>
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-foreground text-background'
+                        : 'bg-muted text-foreground'
+                    }`}
+                  >
+                    <span className="whitespace-pre-wrap animate-[fadein_0.15s_ease-in]">{msg.text}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
 
             {isBusy && messages.at(-1)?.text === '' && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1 rounded-lg bg-muted px-3 py-2">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+                <div className="rounded-lg bg-muted px-3 py-2">
+                  <BikeLoader />
                 </div>
               </div>
             )}
