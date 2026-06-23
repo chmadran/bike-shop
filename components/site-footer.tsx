@@ -1,4 +1,6 @@
-export function SiteFooter() {
+import type { Dictionary } from '@/lib/i18n/dictionaries'
+
+export function SiteFooter({ dict }: { dict: Dictionary }) {
   return (
     <footer>
       <div className="mx-auto flex max-w-4xl flex-col items-start justify-between gap-4 px-4 py-10 sm:flex-row sm:items-center">
@@ -22,7 +24,7 @@ export function SiteFooter() {
           <span className="font-mono text-sm">vur selle</span>
         </div>
         <p className="font-mono text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Vur Selle Bikes. Built for the demo.
+          {dict.footer.rights(new Date().getFullYear())}
         </p>
       </div>
     </footer>
