@@ -17,7 +17,7 @@ export function Hero() {
               Bikes engineered for the details.
             </h1>
             <p className="max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Cadence builds precision road, mountain, city, and electric bikes.
+              Vur Selle builds precision road, mountain, city, and electric bikes.
               Thoughtfully specced, ready to ride, and backed by a team that
               actually rides.
             </p>
@@ -66,7 +66,7 @@ export function Hero() {
             <div className="overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
               <Image
                 src="/bikes/hero-bike.png"
-                alt="A premium Cadence road bicycle"
+                alt="A premium Vur Selle road bicycle"
                 width={1200}
                 height={900}
                 priority

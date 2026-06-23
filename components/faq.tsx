@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: 'Is the electric bike battery covered under warranty?',
-    a: 'Yes. The Volt EV battery is covered for 2 years, and the frame carries our lifetime warranty like every Cadence bike.',
+    a: 'Yes. The Volt EV battery is covered for 2 years, and the frame carries our lifetime warranty like every Vur Selle bike.',
   },
 ]
 
