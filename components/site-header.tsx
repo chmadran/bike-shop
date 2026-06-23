@@ -28,7 +28,7 @@ export function SiteHeader() {
             </svg>
           </span>
           <span className="font-mono text-sm font-medium tracking-tight">
-            cadence
+            vur selle
           </span>
         </Link>
 

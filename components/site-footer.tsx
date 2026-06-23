@@ -19,10 +19,10 @@ export function SiteFooter() {
               />
             </svg>
           </span>
-          <span className="font-mono text-sm">cadence</span>
+          <span className="font-mono text-sm">vur selle</span>
         </div>
         <p className="font-mono text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Cadence Bikes. Built for the demo.
+          © {new Date().getFullYear()} Vur Selle Bikes. Built for the demo.
         </p>
       </div>
     </footer>

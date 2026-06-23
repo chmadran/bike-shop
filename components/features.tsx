@@ -9,7 +9,7 @@ const features = [
   },
   {
     title: 'Lifetime frame warranty',
-    body: 'Every Cadence frame is covered for as long as you own the bike.',
+    body: 'Every Vur Selle frame is covered for as long as you own the bike.',
   },
   {
     title: 'Free annual tune-up',

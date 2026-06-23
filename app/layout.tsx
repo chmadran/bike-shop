@@ -10,9 +10,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Cadence — Precision Bikes',
+  title: 'Vur Selle — Precision Bikes',
   description:
-    'Cadence builds precision road, mountain, city, and electric bikes for riders who care about the details.',
+    'Vur Selle builds precision road, mountain, city, and electric bikes for riders who care about the details.',
   generator: 'v0.app',
   icons: {
     icon: [

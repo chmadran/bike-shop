@@ -8,7 +8,7 @@ export function FaqBotLauncher() {
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {open && (
-        <div className="w-72 overflow-hidden rounded-lg border border-border bg-card shadow-lg sm:w-80">
+        <div className="flex h-[32rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:w-96">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
               <span
@@ -37,12 +37,12 @@ export function FaqBotLauncher() {
               </svg>
             </button>
           </div>
-          <div className="space-y-3 p-4">
+          <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
             <p className="text-sm leading-relaxed text-muted-foreground">
               This is where your FAQ bot will live. Drop your chat component in
               here to answer questions about shipping, sizing, and returns.
             </p>
-            <div className="rounded-md border border-dashed border-border p-3 text-center font-mono text-xs text-muted-foreground">
+            <div className="flex flex-1 items-center justify-center rounded-md border border-dashed border-border p-3 text-center font-mono text-xs text-muted-foreground">
               bot mount point
             </div>
           </div>
