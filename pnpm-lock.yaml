@@ -9,6 +9,9 @@ overrides:
 
 pnpmfileChecksum: sha256-9d/HFFd1ZVm0xGRc4Kfmn9PCpUQD39oFCz0u30RZXkI=
 
+patchedDependencies:
+  nitro@3.0.260610-beta: cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee
+
 importers:
 
   .:
@@ -3873,7 +3876,7 @@ snapshots:
   eve@0.13.4(@opentelemetry/api@1.9.1)(ai@7.0.0-beta.178(zod@3.25.76))(dotenv@17.4.2)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
     dependencies:
       ai: 7.0.0-beta.178(zod@3.25.76)
-      nitro: 3.0.260610-beta(dotenv@17.4.2)
+      nitro: 3.0.260610-beta(patch_hash=cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee)(dotenv@17.4.2)
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       next: 16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -4407,7 +4410,7 @@ snapshots:
 
   nf3@0.3.17: {}
 
-  nitro@3.0.260610-beta(dotenv@17.4.2):
+  nitro@3.0.260610-beta(patch_hash=cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee)(dotenv@17.4.2):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.6(srvx@0.11.17)

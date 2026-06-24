@@ -8,6 +8,9 @@ packageExtensionsChecksum: sha256-BFhBLA/f31bB0k2tXO+iMR5SW/1jSh3kajFaFo0OpeI=
 
 pnpmfileChecksum: sha256-9d/HFFd1ZVm0xGRc4Kfmn9PCpUQD39oFCz0u30RZXkI=
 
+patchedDependencies:
+  nitro@3.0.260610-beta: cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee
+
 importers:
 
   .:
@@ -1341,7 +1344,7 @@ snapshots:
   eve@0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(just-bash@3.0.2)(microsandbox@0.5.7):
     dependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
-      nitro: 3.0.260610-beta
+      nitro: 3.0.260610-beta(patch_hash=cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee)
     optionalDependencies:
       just-bash: 3.0.2
       microsandbox: 0.5.7
@@ -1522,7 +1525,7 @@ snapshots:
 
   nf3@0.3.17: {}
 
-  nitro@3.0.260610-beta:
+  nitro@3.0.260610-beta(patch_hash=cf039f63c2d108ae9b35e0d2b2cc380a1abbf920dbb056a469da9d5c63cd8bee):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.6(srvx@0.11.17)
