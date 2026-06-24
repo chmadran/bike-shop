@@ -7,7 +7,7 @@ type FaqRow = {
   question: string;
   answer: string;
   similarity: number;
-};
+}
 
 export default defineTool({
   description:
@@ -38,7 +38,6 @@ export default defineTool({
       SELECT question, answer,
              1 - (embedding <=> ${vectorString}::vector) AS similarity
       FROM bike_faq
-      WHERE region = 'UK'
       ORDER BY embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `;
