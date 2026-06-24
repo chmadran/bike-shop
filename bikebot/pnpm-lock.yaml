@@ -15,13 +15,13 @@ importers:
         version: 1.1.0
       '@vercel/connect':
         specifier: 0.2.2
-        version: 0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.13.3(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7))
+        version: 0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7))
       ai:
         specifier: 7.0.0-beta.178
         version: 7.0.0-beta.178(zod@4.4.3)
       eve:
-        specifier: 0.13.3
-        version: 0.13.3(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7)
+        specifier: 0.13.4
+        version: 0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7)
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -424,8 +424,8 @@ packages:
       wrangler:
         optional: true
 
-  eve@0.13.3:
-    resolution: {integrity: sha512-UeDjzBq+j6XhECSW5FJjz8Lin4yw75rOchxbI/rmeRj9c9ldERwH/tb+aQRRzh3ZhnkFITzsBpNyF2arYcEjXQ==}
+  eve@0.13.4:
+    resolution: {integrity: sha512-6SKwE92XlkAaTtifOnDAxoghu8gcsSaSB+kphbw7oxGIrGiKIU2DHxxdWYaEKVqCQI3nEJ4QciKh8aJOea50Cw==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -910,12 +910,12 @@ snapshots:
     dependencies:
       execa: 5.1.1
 
-  '@vercel/connect@0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.13.3(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7))':
+  '@vercel/connect@0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7))':
     dependencies:
       '@vercel/oidc': 3.6.1
     optionalDependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
-      eve: 0.13.3(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7)
+      eve: 0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7)
 
   '@vercel/oidc@3.2.0': {}
 
@@ -955,7 +955,7 @@ snapshots:
       httpxy: 0.5.3
       srvx: 0.11.17
 
-  eve@0.13.3(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7):
+  eve@0.13.4(ai@7.0.0-beta.178(zod@4.4.3))(microsandbox@0.5.7):
     dependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
       nitro: 3.0.260610-beta
