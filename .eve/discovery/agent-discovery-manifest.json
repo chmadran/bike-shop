@@ -1,0 +1,22 @@
+{
+  "agentId": "my-project",
+  "agentRoot": "/Users/charlottemadrangeas/Desktop/bike-shop/agent",
+  "appRoot": "/Users/charlottemadrangeas/Desktop/bike-shop",
+  "channels": [],
+  "connections": [],
+  "diagnosticsSummary": {
+    "errors": 1,
+    "warnings": 5
+  },
+  "hooks": [],
+  "instructions": [],
+  "lib": [],
+  "kind": "eve-agent-discovery-manifest",
+  "sandbox": null,
+  "sandboxWorkspaces": [],
+  "schedules": [],
+  "skills": [],
+  "tools": [],
+  "version": 12,
+  "subagents": []
+}

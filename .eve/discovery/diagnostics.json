@@ -1,0 +1,46 @@
+{
+  "diagnostics": [
+    {
+      "code": "discover/unsupported-directory",
+      "message": "Ignoring unsupported directory \".eve/\" in the agent root.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent/.eve",
+      "severity": "warning"
+    },
+    {
+      "code": "discover/unsupported-directory",
+      "message": "Ignoring unsupported directory \".vercel/\" in the agent root.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent/.vercel",
+      "severity": "warning"
+    },
+    {
+      "code": "discover/unsupported-directory",
+      "message": "Ignoring unsupported directory \".workflow-data/\" in the agent root.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent/.workflow-data",
+      "severity": "warning"
+    },
+    {
+      "code": "discover/unsupported-directory",
+      "message": "Ignoring unsupported directory \"agent/\" in the agent root.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent/agent",
+      "severity": "warning"
+    },
+    {
+      "code": "discover/unsupported-directory",
+      "message": "Ignoring unsupported directory \"node_modules/\" in the agent root.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent/node_modules",
+      "severity": "warning"
+    },
+    {
+      "code": "discover/required-instructions-missing",
+      "message": "Expected authored instructions at \"instructions.md\", \"instructions.ts\", \"instructions.cts\", \"instructions.mts\", \"instructions.js\", \"instructions.cjs\", \"instructions.mjs\", or \"instructions/\" directory.",
+      "sourcePath": "/Users/charlottemadrangeas/Desktop/bike-shop/agent",
+      "severity": "error"
+    }
+  ],
+  "kind": "eve-discovery-diagnostics",
+  "summary": {
+    "errors": 1,
+    "warnings": 5
+  },
+  "version": 1
+}
