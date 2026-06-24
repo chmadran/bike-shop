@@ -8,3 +8,9 @@ minimumReleaseAgeExclude:
   - eve
 overrides:
   hono: 4.12.25
+allowBuilds:
+  bufferutil: set this to true or false
+  esbuild: set this to true or false
+  msw: set this to true or false
+  postgresql: set this to true or false
+  sharp: set this to true or false
