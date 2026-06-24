@@ -2,6 +2,8 @@ minimumReleaseAgeExclude:
   - eve
   - "@tybys/wasm-util"
 allowBuilds:
+  '@mongodb-js/zstd': set this to true or false
+  node-liblzma: set this to true or false
   sharp: false
 # Compatibility for eve releases with an incomplete runtime manifest.
 packageExtensions:
