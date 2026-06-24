@@ -1,0 +1,12 @@
+{
+  "runId": "wrun_01KVXCAG4ZKSK8X782CB83G7PV",
+  "hookId": "hook_01KVXCAG4ZF6JYKGRA9PDN0T6Y",
+  "token": "eve:eve:4bc74237-091e-4de4-9214-1fe8a1b7c939",
+  "ownerId": "local-owner",
+  "projectId": "local-project",
+  "environment": "local",
+  "createdAt": "2026-06-24T17:54:51.717Z",
+  "specVersion": 5,
+  "isWebhook": false,
+  "isSystem": false
+}

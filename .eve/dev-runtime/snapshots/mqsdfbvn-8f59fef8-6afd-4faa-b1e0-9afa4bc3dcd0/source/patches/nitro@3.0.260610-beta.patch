@@ -1,0 +1,18 @@
+diff --git a/dist/_build/common.mjs b/dist/_build/common.mjs
+index 76694ff062bae1ef5f6d548ae80b53dcfd8362ef..de6b433fc0bfe2b1ea162642702e4df7eb486eac 100644
+--- a/dist/_build/common.mjs
++++ b/dist/_build/common.mjs
+@@ -21113,7 +21113,12 @@ function getChunkName(chunk, nitro) {
+ 	if (chunk.name === "rolldown-runtime") return "_runtime.mjs";
+ 	if (chunk.moduleIds.every((id) => NODE_MODULES_RE$1.test(id))) {
+ 		const chunkName = joinPkgNames(chunk.moduleIds);
+-		if (chunkName.length > 30) return `${chunk.name}+[...].mjs`;
++		if (chunkName.length > 30) {
++			let __h = 0;
++			for (let __i = 0; __i < chunkName.length; __i++) __h = (Math.imul(__h, 31) + chunkName.charCodeAt(__i)) >>> 0;
++			const __base = (chunk.name || "lib").replace(/^@/, "").replace(/[/\\]/g, "__").replace(/[^a-zA-Z0-9_.-]/g, "_");
++			return `_libs/${__base}+${__h.toString(36)}.mjs`;
++		}
+ 		return `_libs/${chunkName || "_"}.mjs`;
+ 	}
+ 	if (chunk.name.startsWith("_")) return `${chunk.name}.mjs`;

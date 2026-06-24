@@ -1,0 +1,16 @@
+{
+  "eventType": "step_completed",
+  "specVersion": 5,
+  "correlationId": "step_01KVXCAG6AVXZ8GPN8FZ2192BX",
+  "eventData": {
+    "stepName": "step//eve@0.13.4//notifyDriverStep",
+    "workflowName": "workflow//eve//turnWorkflow",
+    "result": {
+      "__type": "Uint8Array",
+      "data": "ZGV2bC0x"
+    }
+  },
+  "runId": "wrun_01KVXCAG6AQXS07CQ3J9DGD38W",
+  "eventId": "evnt_01KVXCAHR4P3VGT1ZNJ1WQ4MFW",
+  "createdAt": "2026-06-24T17:54:53.316Z"
+}
