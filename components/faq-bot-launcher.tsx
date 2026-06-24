@@ -35,6 +35,11 @@ type StoredSession = {
 // ---------------------------------------------------------------------------
 const STORAGE_KEY = 'vs_sessions'
 const MAX_SESSIONS = 20
+const MAX_MESSAGE_LENGTH = 2_000
+
+function normalizeMessage(raw: FormDataEntryValue | null): string {
+  return String(raw ?? '').trim().slice(0, MAX_MESSAGE_LENGTH)
+}
 
 function loadSessions(): StoredSession[] {
   if (typeof window === 'undefined') return []
@@ -134,7 +139,10 @@ function useEveChat() {
   }, [])
 
   const send = useCallback(async (text: string) => {
-    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', text }
+    const trimmed = text.trim().slice(0, MAX_MESSAGE_LENGTH)
+    if (!trimmed) return
+
+    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', text: trimmed }
     const assistantId = crypto.randomUUID()
     setMessages((prev) => [...prev, userMsg, { id: assistantId, role: 'assistant', text: '' }])
     setStatus('loading')
@@ -151,7 +159,7 @@ function useEveChat() {
         ? `/eve/v1/session/${sessionIdRef.current}`
         : '/eve/v1/session'
 
-      const body: Record<string, unknown> = { message: text }
+      const body: Record<string, unknown> = { message: trimmed }
       if (tokenRef.current) body.continuationToken = tokenRef.current
 
       const res = await fetch(url, {
@@ -507,7 +515,7 @@ export function FaqBotLauncher() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
-    const message = String(new FormData(form).get('message') ?? '').trim()
+    const message = normalizeMessage(new FormData(form).get('message'))
     if (!message || isBusy) return
     void send(message)
     form.reset()
@@ -622,6 +630,7 @@ export function FaqBotLauncher() {
                   placeholder="Ask a question…"
                   disabled={isBusy}
                   autoComplete="off"
+                  maxLength={MAX_MESSAGE_LENGTH}
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
                 />
                 <button

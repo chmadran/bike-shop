@@ -4,7 +4,7 @@ const PUBLIC_FILE = /\.(.*)$/
 
 // Simple in-process rate limiter for the eve agent endpoints.
 // 20 requests per IP per minute — enough for a genuine user, blocks scrapers.
-const EVE_RATE_LIMIT = 20
+const EVE_RATE_LIMIT = 10
 const EVE_WINDOW_MS = 60_000
 const rateMap = new Map<string, { count: number; resetAt: number }>()
 
