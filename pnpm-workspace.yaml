@@ -1,9 +1,9 @@
-allowBuilds:
-  bufferutil: true
-  esbuild: true
-  msw: true
-  postgresql: true
-  sharp: true
+strictDepBuilds: false
+onlyBuiltDependencies:
+  - bufferutil
+  - esbuild
+  - msw
+  - sharp
 minimumReleaseAgeExclude:
   - eve
 overrides:
