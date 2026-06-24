@@ -36,8 +36,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       eve:
-        specifier: ^0.13.2
-        version: 0.13.2(@opentelemetry/api@1.9.1)(ai@7.0.0-beta.178(zod@3.25.76))(dotenv@17.4.2)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        specifier: ^0.13.3
+        version: 0.13.3(@opentelemetry/api@1.9.1)(ai@7.0.0-beta.178(zod@3.25.76))(dotenv@17.4.2)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       lucide-react:
         specifier: ^1.16.0
         version: 1.17.0(react@19.2.4)
@@ -1472,8 +1472,8 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  eve@0.13.2:
-    resolution: {integrity: sha512-axrnjR2SMm8c3T2H/PnQmOIrCYfreEzDkqJZlPkkeesF4/bGOkaqRCp4uGDx0b5vw842PXQE4b/HrkxlnxsX+g==}
+  eve@0.13.3:
+    resolution: {integrity: sha512-UeDjzBq+j6XhECSW5FJjz8Lin4yw75rOchxbI/rmeRj9c9ldERwH/tb+aQRRzh3ZhnkFITzsBpNyF2arYcEjXQ==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -3868,7 +3868,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@0.13.2(@opentelemetry/api@1.9.1)(ai@7.0.0-beta.178(zod@3.25.76))(dotenv@17.4.2)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
+  eve@0.13.3(@opentelemetry/api@1.9.1)(ai@7.0.0-beta.178(zod@3.25.76))(dotenv@17.4.2)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
     dependencies:
       ai: 7.0.0-beta.178(zod@3.25.76)
       nitro: 3.0.260610-beta(dotenv@17.4.2)
