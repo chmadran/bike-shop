@@ -3,33 +3,45 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 
 // ---------------------------------------------------------------------------
-// Minimal eve HTTP client — avoids importing eve/react which pulls in
-// Node.js built-ins (node:module) that can't be bundled for the browser.
+// Types
 // ---------------------------------------------------------------------------
-
 type Message = { id: string; role: 'user' | 'assistant'; text: string }
 type Status = 'idle' | 'loading' | 'streaming'
 
+type TurnMeta = {
+  totalMs: number
+  firstTokenMs: number | null
+  toolsCalled: string[]
+  skillsLoaded: string[]
+  eventCount: number
+}
+
+// ---------------------------------------------------------------------------
+// Context approximations (tokens)
+// ---------------------------------------------------------------------------
+const CTX = {
+  instructions: 210,
+  toolSearchFaq: 105,
+  toolGetCatalog: 90,
+  toolCheckStock: 80,
+  skillFaqGuide: 360,
+  skillPurchaseAdvisor: 420,
+}
+const BASE_TOKENS = CTX.instructions + CTX.toolSearchFaq + CTX.toolGetCatalog + CTX.toolCheckStock
+
+// ---------------------------------------------------------------------------
+// Bike loader
+// ---------------------------------------------------------------------------
 function BikeLoader() {
   return (
-    <svg
-      viewBox="0 0 64 32"
-      className="h-5 w-10"
-      aria-label="Thinking…"
-    >
-      {/* Rear wheel */}
+    <svg viewBox="0 0 64 32" className="h-5 w-10" aria-label="Thinking…">
       <circle cx="12" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
-      {/* Front wheel */}
       <circle cx="52" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
-      {/* Frame */}
       <polyline points="12,22 24,8 36,8 52,22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <line x1="24" y1="8" x2="28" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      {/* Saddle */}
       <line x1="33" y1="8" x2="40" y2="8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Handlebar */}
       <line x1="48" y1="10" x2="55" y2="10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <line x1="52" y1="10" x2="52" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      {/* Animated road dots */}
       <circle cx="4"  cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_0ms]" />
       <circle cx="18" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_150ms]" />
       <circle cx="32" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_300ms]" />
@@ -39,26 +51,30 @@ function BikeLoader() {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Eve HTTP client hook
+// ---------------------------------------------------------------------------
 function useEveChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<Status>('idle')
+  const [lastTurn, setLastTurn] = useState<TurnMeta | null>(null)
+  const [totalCostUsd, setTotalCostUsd] = useState(0)
   const sessionIdRef = useRef<string | null>(null)
   const tokenRef = useRef<string | null>(null)
-  // Tracks how many events we've already read so we don't replay previous turns.
   const streamIndexRef = useRef(0)
 
   const send = useCallback(async (text: string) => {
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', text }
     const assistantId = crypto.randomUUID()
-    setMessages((prev) => [
-      ...prev,
-      userMsg,
-      { id: assistantId, role: 'assistant', text: '' },
-    ])
+    setMessages((prev) => [...prev, userMsg, { id: assistantId, role: 'assistant', text: '' }])
     setStatus('loading')
 
+    const turnStart = Date.now()
+    let firstTokenAt: number | null = null
+    const toolsCalled: string[] = []
+    const skillsLoaded: string[] = []
+
     try {
-      // Start or continue the session.
       const url = sessionIdRef.current
         ? `/eve/v1/session/${sessionIdRef.current}`
         : '/eve/v1/session'
@@ -78,7 +94,6 @@ function useEveChat() {
         res.headers.get('x-eve-session-id') ?? json.sessionId ?? sessionIdRef.current
       tokenRef.current = json.continuationToken ?? tokenRef.current
 
-      // Stream only new events for this turn using startIndex.
       setStatus('streaming')
       const stream = await fetch(
         `/eve/v1/session/${sessionIdRef.current}/stream?startIndex=${streamIndexRef.current}`,
@@ -104,23 +119,23 @@ function useEveChat() {
             const d = ev.data ?? {}
 
             if (ev.type === 'message.appended') {
+              if (firstTokenAt === null) firstTokenAt = Date.now()
               const cumulative = (d.messageSoFar as string | undefined) ?? ''
               setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId ? { ...m, text: cumulative } : m,
-                ),
+                prev.map((m) => (m.id === assistantId ? { ...m, text: cumulative } : m)),
               )
             } else if (ev.type === 'message.completed') {
               const msg = d.message as { parts?: { type: string; text?: string }[] } | undefined
-              const final = msg?.parts
-                ?.filter((p) => p.type === 'text')
-                .map((p) => p.text ?? '')
-                .join('') ?? ''
+              const final = msg?.parts?.filter((p) => p.type === 'text').map((p) => p.text ?? '').join('') ?? ''
               setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId && final ? { ...m, text: final } : m,
-                ),
+                prev.map((m) => (m.id === assistantId && final ? { ...m, text: final } : m)),
               )
+            } else if (ev.type === 'tool.started' || ev.type === 'turn.tool_called') {
+              const name = (d.toolName ?? d.name ?? d.tool) as string | undefined
+              if (name && !toolsCalled.includes(name)) toolsCalled.push(name)
+            } else if (ev.type === 'skill.loaded' || ev.type === 'turn.skill_loaded') {
+              const name = (d.skillName ?? d.name ?? d.skill) as string | undefined
+              if (name && !skillsLoaded.includes(name)) skillsLoaded.push(name)
             } else if (
               ev.type === 'session.waiting' ||
               ev.type === 'session.completed' ||
@@ -134,9 +149,26 @@ function useEveChat() {
           }
         }
       }
+
       reader.cancel()
-      // Advance the cursor so the next turn starts reading after these events.
       streamIndexRef.current += eventsRead
+      const meta: TurnMeta = {
+        totalMs: Date.now() - turnStart,
+        firstTokenMs: firstTokenAt ? firstTokenAt - turnStart : null,
+        toolsCalled,
+        skillsLoaded,
+        eventCount: eventsRead,
+      }
+      setLastTurn(meta)
+      // Cost estimate: input = full context sent, output = assistant reply length
+      // gpt-4o-mini: $0.15 / 1M input tokens, $0.60 / 1M output tokens
+      setMessages((prev) => {
+        const inputTokens = BASE_TOKENS + Math.ceil(prev.reduce((s, m) => s + m.text.length, 0) / 4)
+        const outputTokens = Math.ceil((prev.find((m) => m.id === assistantId)?.text.length ?? 0) / 4)
+        const turnCost = (inputTokens * 0.15 + outputTokens * 0.60) / 1_000_000
+        setTotalCostUsd((c) => c + turnCost)
+        return prev
+      })
     } catch (err) {
       console.error('[eve chat]', err)
     } finally {
@@ -144,17 +176,186 @@ function useEveChat() {
     }
   }, [])
 
-  return { messages, status, send }
+  return { messages, status, send, lastTurn, totalCostUsd }
+}
+
+// ---------------------------------------------------------------------------
+// Fluid Compute helpers
+// ---------------------------------------------------------------------------
+// Active CPU = time the function was actually executing code:
+//   - request handling + session lookup: ~30 ms fixed
+//   - each tool call (DB query / embedding): ~80 ms each
+//   - response streaming bookkeeping: ~20 ms fixed
+// Everything else is the function suspended, waiting on LLM I/O — Vercel
+// does not bill for that time with Fluid Compute enabled.
+function estimateActiveCpu(lastTurn: TurnMeta): number {
+  const base = 30
+  const perTool = 80
+  const streamingOverhead = 20
+  return base + lastTurn.toolsCalled.length * perTool + streamingOverhead
+}
+
+function FluidComputeBar({ lastTurn }: { lastTurn: TurnMeta }) {
+  const activeCpu = Math.min(estimateActiveCpu(lastTurn), lastTurn.totalMs)
+  const idleMs = Math.max(lastTurn.totalMs - activeCpu, 0)
+  const savingsPct = Math.round((idleMs / lastTurn.totalMs) * 100)
+  const activePct = 100 - savingsPct
+
+  return (
+    <div className="flex flex-col gap-2">
+      {/* Bar */}
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full bg-violet-500 transition-all duration-500"
+          style={{ width: `${activePct}%` }}
+        />
+        <div
+          className="h-full bg-violet-200 dark:bg-violet-900 transition-all duration-500"
+          style={{ width: `${savingsPct}%` }}
+        />
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-col gap-1 text-muted-foreground">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-sm bg-violet-500" />
+            Active CPU (billed)
+          </span>
+          <span className="font-mono">~{activeCpu} ms</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-sm bg-violet-200 dark:bg-violet-900" />
+            Idle — waiting on LLM I/O
+          </span>
+          <span className="font-mono">~{idleMs.toLocaleString()} ms</span>
+        </div>
+        <div className="mt-1 flex items-center justify-between font-medium text-foreground">
+          <span>Compute saved</span>
+          <span className="font-mono text-violet-500">{savingsPct}%</span>
+        </div>
+      </div>
+
+      <p className="text-[10px] leading-relaxed text-muted-foreground">
+        With Fluid Compute, the function suspends during LLM I/O and releases CPU.
+        You're only billed for the ~{activeCpu} ms of active execution, not the full {lastTurn.totalMs.toLocaleString()} ms wall-clock turn.
+      </p>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Agent info panel
+// ---------------------------------------------------------------------------
+function estimateTokens(messages: Message[]): number {
+  // GPT tokeniser averages ~4 chars/token for English prose.
+  return Math.ceil(messages.reduce((sum, m) => sum + m.text.length, 0) / 4)
+}
+
+function AgentInfoPanel({ lastTurn, messages, totalCostUsd }: { lastTurn: TurnMeta | null; messages: Message[]; totalCostUsd: number }) {
+  const skillTokens =
+    (lastTurn?.skillsLoaded.includes('faq_guide') ? CTX.skillFaqGuide : 0) +
+    (lastTurn?.skillsLoaded.includes('purchase_advisor') ? CTX.skillPurchaseAdvisor : 0)
+  const conversationTokens = estimateTokens(messages)
+  const totalCtx = BASE_TOKENS + skillTokens + conversationTokens
+
+  const segments = [
+    { label: 'Instructions', tokens: CTX.instructions, color: 'bg-zinc-400' },
+    { label: 'Tools (×3)', tokens: CTX.toolSearchFaq + CTX.toolGetCatalog + CTX.toolCheckStock, color: 'bg-blue-400' },
+    ...(skillTokens > 0 ? [{ label: 'Skills loaded', tokens: skillTokens, color: 'bg-amber-400' }] : []),
+    ...(conversationTokens > 0 ? [{ label: 'Conversation', tokens: conversationTokens, color: 'bg-emerald-400' }] : []),
+  ]
+
+  const WINDOW = 128_000
+  const pct = (t: number) => `${((t / WINDOW) * 100).toFixed(2)}%`
+
+  return (
+    <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 text-xs">
+      {/* Token bar */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between text-muted-foreground">
+          <span className="font-medium text-foreground">Context window</span>
+          <span>{totalCtx.toLocaleString()} / 128K tokens</span>
+        </div>
+        <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+          {segments.map((s) => (
+            <div key={s.label} className={`h-full ${s.color}`} style={{ width: pct(s.tokens) }} />
+          ))}
+        </div>
+        <div className="mt-2 flex flex-col gap-1">
+          {segments.map((s) => (
+            <div key={s.label} className="flex items-center justify-between text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className={`inline-block h-2 w-2 rounded-sm ${s.color}`} />
+                {s.label}
+              </span>
+              <span>~{s.tokens}</span>
+            </div>
+          ))}
+          {skillTokens === 0 && (
+            <div className="flex items-center justify-between text-muted-foreground opacity-50">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-sm border border-amber-400" />
+                Skills (on-demand)
+              </span>
+              <span>+{CTX.skillFaqGuide}–{CTX.skillFaqGuide + CTX.skillPurchaseAdvisor}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <hr className="border-border" />
+
+      {/* Model */}
+      <div>
+        <p className="mb-2 font-medium text-foreground">Model</p>
+        <div className="flex flex-col gap-1 text-muted-foreground">
+          <div className="flex justify-between"><span>Model</span><span className="font-mono">gpt-4o-mini</span></div>
+          <div className="flex justify-between"><span>Context window</span><span>128K tokens</span></div>
+          <div className="flex justify-between"><span>Input cost</span><span>$0.15 / 1M tokens</span></div>
+          <div className="flex justify-between"><span>Output cost</span><span>$0.60 / 1M tokens</span></div>
+          <div className="flex justify-between font-medium text-foreground">
+            <span>Session cost so far</span>
+            <span className="font-mono">${totalCostUsd < 0.0001 ? '<$0.0001' : totalCostUsd.toFixed(4)}</span>
+          </div>
+        </div>
+      </div>
+
+      <hr className="border-border" />
+
+      {/* Fluid Compute */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="font-medium text-foreground">Fluid Compute savings</p>
+          <a
+            href="https://vercel.com/docs/functions/fluid-compute"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-muted-foreground underline-offset-2 hover:underline"
+          >
+            what's this?
+          </a>
+        </div>
+        {lastTurn ? (
+          <FluidComputeBar lastTurn={lastTurn} />
+        ) : (
+          <p className="text-muted-foreground">Send a message to see savings.</p>
+        )}
+      </div>
+
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
 // UI
 // ---------------------------------------------------------------------------
-
 export function FaqBotLauncher() {
   const [open, setOpen] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const { messages, status, send } = useEveChat()
+  const { messages, status, send, lastTurn, totalCostUsd } = useEveChat()
   const isBusy = status !== 'idle'
 
   useEffect(() => {
@@ -173,91 +374,97 @@ export function FaqBotLauncher() {
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {open && (
-        <div className="flex h-[32rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:w-96">
+        <div className="flex h-[calc(100dvh-6rem)] max-h-[56rem] w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:w-[480px]">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ background: 'var(--geist-blue)' }}
-              />
-              <span className="text-sm font-medium">FAQ Assistant</span>
+              <span className="h-2 w-2 rounded-full" style={{ background: 'var(--geist-blue)' }} />
+              <span className="text-sm font-medium">Helpful Assistant</span>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Close assistant"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowInfo((v) => !v)}
+                className={`rounded-md px-2 py-1 font-mono text-xs transition-colors ${showInfo ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                aria-label="Toggle agent info"
+              >
+                {showInfo ? 'chat' : 'internals'}
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Close assistant"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
-            {messages.length === 0 && (
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Ask me anything about shipping, sizing, returns, or stock availability.
-              </p>
-            )}
+          {showInfo ? (
+            <AgentInfoPanel lastTurn={lastTurn} messages={messages} totalCostUsd={totalCostUsd} />
+          ) : (
+            <>
+              {/* Messages */}
+              <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
+                {messages.length === 0 && (
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Ask me anything about shipping, sizing, returns, or stock availability.
+                  </p>
+                )}
 
-            {messages.map((msg) => {
-              const isEmpty = msg.role === 'assistant' && msg.text === ''
-              // Don't render the empty assistant placeholder — show the loader instead.
-              if (isEmpty) return null
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'bg-foreground text-background'
-                        : 'bg-muted text-foreground'
-                    }`}
-                  >
-                    <span className="whitespace-pre-wrap animate-[fadein_0.15s_ease-in]">{msg.text}</span>
+                {messages.map((msg) => {
+                  const isEmpty = msg.role === 'assistant' && msg.text === ''
+                  if (isEmpty) return null
+                  return (
+                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                          msg.role === 'user' ? 'bg-foreground text-background' : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        <span className="whitespace-pre-wrap animate-[fadein_0.15s_ease-in]">{msg.text}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {isBusy && messages.at(-1)?.text === '' && (
+                  <div className="flex justify-start">
+                    <div className="rounded-lg bg-muted px-3 py-2">
+                      <BikeLoader />
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )}
 
-            {isBusy && messages.at(-1)?.text === '' && (
-              <div className="flex justify-start">
-                <div className="rounded-lg bg-muted px-3 py-2">
-                  <BikeLoader />
-                </div>
+                <div ref={bottomRef} />
               </div>
-            )}
 
-            <div ref={bottomRef} />
-          </div>
-
-          {/* Composer */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 border-t border-border px-3 py-2"
-          >
-            <input
-              name="message"
-              placeholder="Ask a question…"
-              disabled={isBusy}
-              autoComplete="off"
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={isBusy}
-              className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background transition-opacity hover:opacity-80 disabled:opacity-40"
-              aria-label="Send"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </form>
+              {/* Composer */}
+              <form
+                onSubmit={handleSubmit}
+                className="flex items-center gap-2 border-t border-border px-3 py-2"
+              >
+                <input
+                  name="message"
+                  placeholder="Ask a question…"
+                  disabled={isBusy}
+                  autoComplete="off"
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isBusy}
+                  className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background transition-opacity hover:opacity-80 disabled:opacity-40"
+                  aria-label="Send"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </form>
+            </>
+          )}
         </div>
       )}
 

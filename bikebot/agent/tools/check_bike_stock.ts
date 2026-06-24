@@ -29,7 +29,6 @@ export default defineTool({
       SELECT model_name, warehouse, in_stock, quantity
       FROM bike_stock
       WHERE lower(replace(replace(model_name, '-', ' '), '_', ' ')) = ${slug}
-        AND region = 'UK'
       ORDER BY warehouse
     `;
 
@@ -51,7 +50,7 @@ export default defineTool({
       warehouses,
       message: inStock
         ? `${displayName} is in stock at: ${warehouses.join(", ")}.`
-        : `${displayName} is currently out of stock in the UK.`,
+        : `${displayName} is currently out of stock.`,
     };
   },
 });
