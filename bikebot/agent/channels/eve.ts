@@ -3,11 +3,9 @@ import { localDev, none, vercelOidc } from "eve/channels/auth";
 
 export default eveChannel({
   auth: [
-    // Open on localhost for `eve dev` and the REPL; ignored in production.
     localDev(),
-    // Lets the eve TUI and your Vercel deployments reach the deployed agent.
     vercelOidc(),
-    // Public access for browser requests — the FAQ bot is open to all visitors.
+    // Public access for browser requests — the customer bot is open to all visitors.
     none(),
   ],
 });

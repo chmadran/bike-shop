@@ -65,7 +65,7 @@ function useEveChat() {
 
       const body: Record<string, unknown> = { message: text }
       if (tokenRef.current) body.continuationToken = tokenRef.current
-      body.clientContext = { locale: 'en', currency: 'GBP', region: 'UK' }
+      body.clientContext = { mode: 'customer', locale: 'en', currency: 'GBP', region: 'UK' }
 
       const res = await fetch(url, {
         method: 'POST',
