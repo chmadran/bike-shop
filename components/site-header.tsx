@@ -4,7 +4,7 @@ import type { Dictionary } from '@/lib/i18n/dictionaries'
 export function SiteHeader({ dict }: { dict: Dictionary }) {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
             <svg
@@ -27,21 +27,6 @@ export function SiteHeader({ dict }: { dict: Dictionary }) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 sm:flex">
-          {[
-            { label: dict.header.nav.bikes, href: '#bikes' },
-            { label: dict.header.nav.features, href: '#features' },
-            { label: dict.header.nav.faq, href: '#faq' },
-          ].map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
 
         <a
           href="#bikes"

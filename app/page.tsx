@@ -14,7 +14,6 @@ export default function Page() {
       <SiteHeader dict={dict} />
       <Hero dict={dict} />
       <BikeGrid dict={dict} />
-      <Features dict={dict} />
       <SiteFooter dict={dict} />
       <FaqBotLauncher />
     </main>
