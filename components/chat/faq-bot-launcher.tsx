@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import { parseChatMessage, MAX_CHAT_MESSAGE_LENGTH } from '@/lib/validation/chat'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -460,6 +461,7 @@ export function FaqBotLauncher() {
   const [view, setView] = useState<View>('chat')
   const [sessions, setSessions] = useState<StoredSession[]>([])
   const [activeKey, setActiveKey] = useState('')
+  const [inputError, setInputError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const { messages, status, send, lastTurn, totalCostUsd, restore, snapshot, reset } = useEveChat()
   const isBusy = status !== 'idle'
@@ -506,10 +508,20 @@ export function FaqBotLauncher() {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (isBusy) return
     const form = e.currentTarget
-    const message = String(new FormData(form).get('message') ?? '').trim()
-    if (!message || isBusy) return
-    void send(message)
+    const raw = new FormData(form).get('message')
+
+    // Validate with the same schema enforced on the server, so the user gets
+    // instant feedback and we never send a malformed payload.
+    const result = parseChatMessage({ message: raw })
+    if (!result.success) {
+      setInputError(result.error)
+      return
+    }
+
+    setInputError(null)
+    void send(result.data.message)
     form.reset()
     setView('chat')
   }
@@ -616,14 +628,25 @@ export function FaqBotLauncher() {
                 )}
                 <div ref={bottomRef} />
               </div>
-              <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-border px-3 py-2">
-                <input
-                  name="message"
-                  placeholder="Ask a question…"
-                  disabled={isBusy}
-                  autoComplete="off"
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
-                />
+              <form onSubmit={handleSubmit} className="flex flex-col border-t border-border px-3 py-2">
+                {inputError && (
+                  <p className="pb-1 text-xs text-destructive" role="alert">
+                    {inputError}
+                  </p>
+                )}
+                <div className="flex items-center gap-2">
+                  <input
+                    name="message"
+                    placeholder="Ask a question…"
+                    disabled={isBusy}
+                    autoComplete="off"
+                    maxLength={MAX_CHAT_MESSAGE_LENGTH}
+                    onChange={() => {
+                      if (inputError) setInputError(null)
+                    }}
+                    aria-invalid={inputError ? true : undefined}
+                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+                  />
                 <button
                   type="submit"
                   disabled={isBusy}
@@ -633,7 +656,8 @@ export function FaqBotLauncher() {
                   <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                </button>
+                  </button>
+                </div>
               </form>
             </>
           )}

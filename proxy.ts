@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { parseChatMessage } from '@/lib/validation/chat'
 
 const PUBLIC_FILE = /\.(.*)$/
 
@@ -19,15 +20,36 @@ function isRateLimited(ip: string): boolean {
   return entry.count > EVE_RATE_LIMIT
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Rate-limit eve agent endpoints.
+  // Rate-limit + validate eve agent endpoints.
   if (pathname.startsWith('/eve/v1/session')) {
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
     if (isRateLimited(ip)) {
       return new NextResponse('Too many requests', { status: 429 })
+    }
+
+    // Sanitize the chat payload server-side before it reaches the agent.
+    // Only message-bearing POSTs carry a body worth validating (the GET
+    // streaming endpoint has none). We clone the request so reading the body
+    // here does not consume the stream forwarded downstream to eve.
+    if (request.method === 'POST') {
+      let body: unknown
+      try {
+        body = await request.clone().json()
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid JSON body.' },
+          { status: 400 },
+        )
+      }
+
+      const result = parseChatMessage(body)
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 })
+      }
     }
   }
 

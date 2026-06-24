@@ -1,9 +1,9 @@
-import { SiteHeader } from '@/components/site-header'
-import { Hero } from '@/components/hero'
-import { BikeGrid } from '@/components/bike-grid'
-import { Features } from '@/components/features'
-import { SiteFooter } from '@/components/site-footer'
-import { FaqBotLauncher } from '@/components/faq-bot-launcher'
+import { SiteHeader } from '@/components/layout/site-header'
+import { Hero } from '@/components/marketing/hero'
+import { BikeGrid } from '@/components/marketing/bike-grid'
+import { Features } from '@/components/marketing/features'
+import { SiteFooter } from '@/components/layout/site-footer'
+import { FaqBotLauncher } from '@/components/chat/faq-bot-launcher'
 import { getDictionary } from '@/lib/i18n/dictionaries'
 
 export default function Page() {
