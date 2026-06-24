@@ -7,6 +7,8 @@ settings:
 overrides:
   hono: 4.12.25
 
+pnpmfileChecksum: sha256-9d/HFFd1ZVm0xGRc4Kfmn9PCpUQD39oFCz0u30RZXkI=
+
 importers:
 
   .:
