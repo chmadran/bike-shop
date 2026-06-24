@@ -18,7 +18,7 @@ export default async function Page({
 
   return (
     <main className="min-h-dvh bg-background">
-      <SiteHeader dict={dict} locale={locale} />
+      <SiteHeader dict={dict} />
       <Hero dict={dict} />
       <BikeGrid dict={dict} />
       <Features dict={dict} />

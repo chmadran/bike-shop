@@ -17,7 +17,6 @@ function normalise(s: string) {
 function resolveRegion(raw: string): string | null {
   const r = raw.toLowerCase().trim();
   if (["uk", "england", "britain", "united kingdom"].includes(r)) return "UK";
-  if (["france", "fr"].includes(r)) return "France";
   return null;
 }
 
@@ -39,7 +38,7 @@ export default defineTool({
       return {
         inStock: false,
         warehouses: [],
-        message: `Unknown region "${targetRegion}". Supported regions: UK, France.`,
+        message: `We currently only ship within the UK.`,
       };
     }
 
@@ -58,7 +57,7 @@ export default defineTool({
       return {
         inStock: false,
         warehouses: [],
-        message: `No stock record found for "${modelName}" in ${region}. Available models: Meridian RD, Summit TR, District CB, Volt EV.`,
+        message: `No stock record found for "${modelName}". Available models: Meridian RD, Summit TR, District CB, Volt EV.`,
       };
     }
 

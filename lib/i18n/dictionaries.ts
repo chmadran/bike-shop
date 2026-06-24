@@ -13,7 +13,6 @@ export type Dictionary = {
   header: {
     nav: { bikes: string; features: string; faq: string }
     shop: string
-    switchLabel: string
   }
   hero: {
     badge: string
@@ -59,7 +58,6 @@ const en: Dictionary = {
   header: {
     nav: { bikes: 'Bikes', features: 'Features', faq: 'FAQ' },
     shop: 'Shop',
-    switchLabel: 'Language',
   },
   hero: {
     badge: 'New 2026 lineup',
@@ -172,126 +170,8 @@ const en: Dictionary = {
   },
 }
 
-const fr: Dictionary = {
-  intl: { locale: 'fr-FR', currency: 'EUR' },
-  header: {
-    nav: { bikes: 'Vélos', features: 'Avantages', faq: 'FAQ' },
-    shop: 'Boutique',
-    switchLabel: 'Langue',
-  },
-  hero: {
-    badge: 'Nouvelle gamme 2026',
-    title: 'Des vélos pensés dans le moindre détail.',
-    subtitle:
-      'Vur Selle conçoit des vélos de route, VTT, urbains et électriques de précision. Équipement soigné, prêts à rouler, et soutenus par une équipe qui roule vraiment.',
-    stats: {
-      models: { label: 'Modèles', value: '4' },
-      warranty: { label: 'Garantie', value: 'À vie' },
-      returns: { label: 'Retours', value: '30 jours' },
-    },
-    imageAlt: 'Un vélo de route Vur Selle haut de gamme',
-  },
-  bikeGrid: {
-    title: 'La gamme',
-    subtitle: 'Quatre vélos, une seule obsession de la qualité.',
-    models: (n) => `${n} modèles`,
-  },
-  bikes: {
-    'meridian-rd': {
-      name: 'Meridian RD',
-      category: 'Route',
-      price: 3700,
-      description:
-        'Un vélo de route en carbone ultraléger, réglé pour les longues montées et les descentes rapides.',
-      spec: '7,1 kg · Carbone · 22 vitesses',
-    },
-    'summit-tr': {
-      name: 'Summit TR',
-      category: 'VTT',
-      price: 4750,
-      description:
-        'Un VTT tout-suspendu qui absorbe les terrains accidentés sans vous ralentir.',
-      spec: '13,4 kg · 150 mm de débattement · 12 vitesses',
-    },
-    'district-cb': {
-      name: 'District CB',
-      category: 'Ville',
-      price: 1690,
-      description:
-        'Un vélo urbain épuré et sans entretien, conçu pour les trajets quotidiens et le stationnement facile.',
-      spec: '11,0 kg · Courroie · 8 vitesses',
-    },
-    'volt-ev': {
-      name: 'Volt EV',
-      category: 'Électrique',
-      price: 4450,
-      description:
-        'Un vélo électrique avec batterie intégrée et 90 km d’autonomie pour avaler les kilomètres sans effort.',
-      spec: '19,5 kg · 90 km d’autonomie · moteur 250 W',
-    },
-  },
-  features: {
-    title: 'Pourquoi rouler avec nous',
-    items: [
-      {
-        title: 'Retours gratuits sous 30 jours',
-        body: 'Roulez pendant un mois. Si ce n’est pas le bon, renvoyez-le à nos frais.',
-      },
-      {
-        title: 'Livré prêt à rouler',
-        body: 'Assemblé à 95 % dès la sortie du carton. Montez les pédales, réglez le guidon, et c’est parti.',
-      },
-      {
-        title: 'Garantie cadre à vie',
-        body: 'Chaque cadre Vur Selle est garanti tant que vous possédez le vélo.',
-      },
-      {
-        title: 'Révision annuelle offerte',
-        body: 'Présentez-le une fois par an dans un atelier partenaire pour un entretien gratuit.',
-      },
-    ],
-  },
-  faq: {
-    title: 'Questions fréquentes',
-    subtitle:
-      'Vous ne trouvez pas ce qu’il vous faut ? Demandez à notre assistant dans le coin.',
-    items: [
-      {
-        q: 'Combien de temps prend la livraison ?',
-        a: 'La plupart des commandes sont expédiées sous 2 jours ouvrés et arrivent en 5 à 7 jours ouvrés. Vous recevrez un lien de suivi par e-mail dès que votre vélo est en route.',
-      },
-      {
-        q: 'Dois-je assembler le vélo ?',
-        a: 'Les vélos arrivent assemblés à environ 95 %. Vous devrez fixer les pédales, redresser le guidon et vérifier la pression des pneus. Cela prend environ 15 minutes avec les outils fournis.',
-      },
-      {
-        q: 'Quelles tailles sont disponibles ?',
-        a: 'Chaque modèle est proposé en S, M, L et XL. Utilisez le guide des tailles sur chaque page produit, ou envoyez-nous votre taille et votre entrejambe et nous vous recommanderons un ajustement.',
-      },
-      {
-        q: 'Quelle est votre politique de retour ?',
-        a: 'Vous pouvez retourner n’importe quel vélo sous 30 jours pour un remboursement intégral, tant qu’il est en état de revente. Les frais de retour sont à notre charge.',
-      },
-      {
-        q: 'La batterie du vélo électrique est-elle couverte par la garantie ?',
-        a: 'Oui. La batterie du Volt EV est garantie 2 ans, et le cadre bénéficie de notre garantie à vie comme tous les vélos Vur Selle.',
-      },
-    ],
-  },
-  footer: {
-    rights: (year) => `© ${year} Vur Selle Bikes. Conçu pour la démo.`,
-  },
-  bot: {
-    title: 'Assistant FAQ',
-    placeholder:
-      'C’est ici que vivra votre bot FAQ. Insérez votre composant de chat ici pour répondre aux questions sur la livraison, les tailles et les retours.',
-    mount: 'point de montage du bot',
-    open: 'Ouvrir l’assistant FAQ',
-    close: 'Fermer l’assistant',
-  },
-}
 
-const dictionaries: Record<Locale, Dictionary> = { en, fr }
+const dictionaries: Record<Locale, Dictionary> = { en }
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale]

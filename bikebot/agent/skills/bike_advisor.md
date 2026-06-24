@@ -11,7 +11,7 @@ When a customer asks which bike to buy or needs a recommendation, follow this fr
 Ask (only what you don't already know from context):
 
 - **Primary use**: commuting, weekend leisure, trail riding, fitness, or long-distance road?
-- **Budget**: they can filter by price — our range is £1,450–£4,100 (UK) / €1,690–€4,750 (France)
+- **Budget**: our range is £1,450–£4,100
 - **Experience**: beginner, intermediate, experienced?
 - **Physical considerations**: any preference for lighter weight or step-through geometry?
 
@@ -19,16 +19,14 @@ Don't ask all four at once. If context already answers one, skip it.
 
 ## Step 2 — Match to the lineup
 
-Use the customer's currency from `clientContext.currency` (GBP or EUR). Never show both.
+All prices in GBP.
 
-| Model | Best for | Weight | Price (GBP) | Price (EUR) |
-|---|---|---|---|---|
-| **District CB** | Daily commuting, city errands, low maintenance | 11.0 kg | £1,450 | €1,690 |
-| **Meridian RD** | Fitness, long rides, climbing, speed | 7.1 kg | £3,200 | €3,700 |
-| **Summit TR** | Trail/mountain riding, off-road, technical terrain | 13.4 kg | £4,100 | €4,750 |
-| **Volt EV** | Effortless commuting, hills, longer distances without effort | 19.5 kg | £3,850 | €4,450 |
-
-Pick the right price column based on `clientContext.currency` and show only that price in your answer.
+| Model | Best for | Weight | Price |
+|---|---|---|---|
+| **District CB** | Daily commuting, city errands, low maintenance | 11.0 kg | £1,450 |
+| **Meridian RD** | Fitness, long rides, climbing, speed | 7.1 kg | £3,200 |
+| **Summit TR** | Trail/mountain riding, off-road, technical terrain | 13.4 kg | £4,100 |
+| **Volt EV** | Effortless commuting, hills, longer distances without effort | 19.5 kg | £3,850 |
 
 ### Quick decision rules
 
@@ -40,7 +38,7 @@ Pick the right price column based on `clientContext.currency` and show only that
 
 ## Step 3 — Check stock
 
-After identifying the right model, always call `check_bike_stock` to confirm availability in their region before committing to a recommendation.
+After identifying the right model, always call `check_bike_stock` to confirm UK availability before committing to a recommendation.
 
 ## Step 4 — Make a clear recommendation
 

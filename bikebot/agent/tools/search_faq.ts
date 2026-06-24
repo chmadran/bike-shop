@@ -18,9 +18,9 @@ export default defineTool({
   inputSchema: z.object({
     query: z.string().describe("The customer's question or topic to search for."),
     region: z
-      .enum(["UK", "France"])
+      .enum(["UK"])
       .optional()
-      .describe("Filter results to a specific region."),
+      .describe("Filter results to the UK region."),
     limit: z
       .number()
       .int()

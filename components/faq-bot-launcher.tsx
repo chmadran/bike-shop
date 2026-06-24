@@ -57,10 +57,6 @@ function useEveChat() {
     ])
     setStatus('loading')
 
-    // Derive locale from the URL path, e.g. /en/... → 'en', /fr/... → 'fr'
-    const locale = window.location.pathname.split('/').find(Boolean) ?? 'en'
-    const currency = locale === 'fr' ? 'EUR' : 'GBP'
-
     try {
       // Start or continue the session.
       const url = sessionIdRef.current
@@ -69,7 +65,7 @@ function useEveChat() {
 
       const body: Record<string, unknown> = { message: text }
       if (tokenRef.current) body.continuationToken = tokenRef.current
-      body.clientContext = { locale, currency, region: locale === 'fr' ? 'France' : 'UK' }
+      body.clientContext = { locale: 'en', currency: 'GBP', region: 'UK' }
 
       const res = await fetch(url, {
         method: 'POST',

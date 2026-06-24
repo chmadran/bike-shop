@@ -1,23 +1,11 @@
 import Link from 'next/link'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
-import type { Locale } from '@/lib/i18n/config'
-import { LanguageToggle } from '@/components/language-toggle'
 
-export function SiteHeader({
-  dict,
-  locale,
-}: {
-  dict: Dictionary
-  locale: Locale
-}) {
-  const nav = [
-    { },
-  ]
-
+export function SiteHeader({ dict }: { dict: Dictionary }) {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-        <Link href={`/${locale}`} className="flex items-center gap-2">
+        <Link href="/en" className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
             <svg
               viewBox="0 0 24 24"
@@ -39,17 +27,28 @@ export function SiteHeader({
           </span>
         </Link>
 
-       
+        <nav className="hidden items-center gap-6 sm:flex">
+          {[
+            { label: dict.header.nav.bikes, href: '#bikes' },
+            { label: dict.header.nav.features, href: '#features' },
+            { label: dict.header.nav.faq, href: '#faq' },
+          ].map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-        <div className="flex items-center gap-3">
-          <LanguageToggle locale={locale} label={dict.header.switchLabel} />
-          <a
-            href="#bikes"
-            className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-          >
-            {dict.header.shop}
-          </a>
-        </div>
+        <a
+          href="#bikes"
+          className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          {dict.header.shop}
+        </a>
       </div>
     </header>
   )
