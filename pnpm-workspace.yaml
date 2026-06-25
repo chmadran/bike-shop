@@ -11,8 +11,10 @@ overrides:
 patchedDependencies:
   nitro@3.0.260610-beta: patches/nitro@3.0.260610-beta.patch
 allowBuilds:
+  '@mongodb-js/zstd': set this to true or false
   bufferutil: set this to true or false
   esbuild: set this to true or false
   msw: set this to true or false
+  node-liblzma: set this to true or false
   postgresql: set this to true or false
   sharp: set this to true or false

@@ -14,13 +14,13 @@ export function BikeCard({ bike, priority }: BikeCardProps) {
       href={`/bikes?bike=${bike.id}`}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
     >
-      <div className="overflow-hidden border-b border-border bg-muted">
+      <div className="overflow-hidden border-b border-border bg-bike-surface">
         <Image
           src={bike.image}
           alt={bike.name}
           width={600}
           height={400}
-          className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
           priority={priority}
         />
       </div>
