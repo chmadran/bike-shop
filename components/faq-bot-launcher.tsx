@@ -48,6 +48,8 @@ type StoredSession = {
 const STORAGE_KEY = 'vs_sessions'
 const MAX_SESSIONS = 20
 const MAX_MESSAGE_LENGTH = 2_000
+const CHAT_ERROR_MESSAGE =
+  "Sorry — I couldn't get a reply. This can happen after a dev server restart. Try again, or tap **New chat** in History."
 
 function normalizeMessage(raw: FormDataEntryValue | null): string {
   return String(raw ?? '').trim().slice(0, MAX_MESSAGE_LENGTH)
@@ -155,32 +157,40 @@ function useEveChat() {
     setStatus('loading')
 
     const turnStart = Date.now()
-    let firstTokenAt: number | null = null
-    let lastTokenAt: number | null = null
-    let appendedCount = 0
-    const toolsCalled: string[] = []
-    const skillsLoaded: string[] = []
-    const pendingCalls = new Map<string, PendingToolCall>()
-    let turnCatalog: ReturnType<typeof parseCatalogOutput> = null
-    let focusModel: string | null = null
-    let assistantText = ''
 
-    const applyRecommendedAttachment = () => {
-      const model =
-        focusModel ?? inferFocusModelFromText(assistantText, turnCatalog)
-      const attachment = buildRecommendedBikeAttachment(turnCatalog, model)
-      if (!attachment) return
-
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId
-            ? { ...m, attachments: mergeAttachments(m.attachments, attachment) }
-            : m,
-        ),
-      )
+    const clearEveSession = () => {
+      sessionIdRef.current = null
+      tokenRef.current = null
+      streamIndexRef.current = 0
     }
 
-    try {
+    const runTurn = async (): Promise<{ failed: boolean; gotText: boolean }> => {
+      let firstTokenAt: number | null = null
+      let lastTokenAt: number | null = null
+      let appendedCount = 0
+      const toolsCalled: string[] = []
+      const skillsLoaded: string[] = []
+      const pendingCalls = new Map<string, PendingToolCall>()
+      let turnCatalog: ReturnType<typeof parseCatalogOutput> = null
+      let focusModel: string | null = null
+      let assistantText = ''
+      let turnFailed = false
+
+      const applyRecommendedAttachment = () => {
+        const model =
+          focusModel ?? inferFocusModelFromText(assistantText, turnCatalog)
+        const attachment = buildRecommendedBikeAttachment(turnCatalog, model)
+        if (!attachment) return
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, attachments: mergeAttachments(m.attachments, attachment) }
+              : m,
+          ),
+        )
+      }
+
       const url = sessionIdRef.current
         ? `/eve/v1/session/${sessionIdRef.current}`
         : '/eve/v1/session'
@@ -194,16 +204,36 @@ function useEveChat() {
         body: JSON.stringify(body),
       })
 
-      const json = await res.json()
+      if (!res.ok) {
+        return { failed: true, gotText: false }
+      }
+
+      const json = (await res.json()) as {
+        ok?: boolean
+        sessionId?: string
+        continuationToken?: string
+      }
+      if (json.ok === false) {
+        return { failed: true, gotText: false }
+      }
+
       sessionIdRef.current =
         res.headers.get('x-eve-session-id') ?? json.sessionId ?? sessionIdRef.current
       tokenRef.current = json.continuationToken ?? tokenRef.current
+
+      if (!sessionIdRef.current) {
+        return { failed: true, gotText: false }
+      }
 
       setStatus('streaming')
       const stream = await fetch(
         `/eve/v1/session/${sessionIdRef.current}/stream?startIndex=${streamIndexRef.current}`,
       )
-      const reader = stream.body!.getReader()
+      if (!stream.ok || !stream.body) {
+        return { failed: true, gotText: false }
+      }
+
+      const reader = stream.body.getReader()
       const dec = new TextDecoder()
       let buf = ''
       let done = false
@@ -300,12 +330,11 @@ function useEveChat() {
             } else if (ev.type === 'skill.loaded' || ev.type === 'turn.skill_loaded') {
               const name = (d.skillName ?? d.name ?? d.skill) as string | undefined
               if (name && !skillsLoaded.includes(name)) skillsLoaded.push(name)
-            } else if (
-              ev.type === 'session.waiting' ||
-              ev.type === 'session.completed' ||
-              ev.type === 'session.failed' ||
-              ev.type === 'turn.failed'
-            ) {
+            } else if (ev.type === 'session.failed' || ev.type === 'turn.failed') {
+              turnFailed = true
+              applyRecommendedAttachment()
+              done = true
+            } else if (ev.type === 'session.waiting' || ev.type === 'session.completed') {
               applyRecommendedAttachment()
               done = true
             }
@@ -316,25 +345,58 @@ function useEveChat() {
       reader.cancel()
       applyRecommendedAttachment()
       streamIndexRef.current += eventsRead
-      setLastTurn({
-        totalMs: Date.now() - turnStart,
-        firstTokenMs: firstTokenAt ? firstTokenAt - turnStart : null,
-        interTokenMs:
-          firstTokenAt && lastTokenAt && appendedCount > 1
-            ? Math.round((lastTokenAt - firstTokenAt) / (appendedCount - 1))
-            : null,
-        toolsCalled,
-        skillsLoaded,
-        eventCount: eventsRead,
-      })
-      setMessages((prev) => {
-        const inputTokens = BASE_TOKENS + Math.ceil(prev.reduce((s, m) => s + m.text.length, 0) / 4)
-        const outputTokens = Math.ceil((prev.find((m) => m.id === assistantId)?.text.length ?? 0) / 4)
-        setTotalCostUsd((c) => c + (inputTokens * 0.15 + outputTokens * 0.60) / 1_000_000)
-        return prev
-      })
+
+      if (!turnFailed) {
+        setLastTurn({
+          totalMs: Date.now() - turnStart,
+          firstTokenMs: firstTokenAt ? firstTokenAt - turnStart : null,
+          interTokenMs:
+            firstTokenAt && lastTokenAt && appendedCount > 1
+              ? Math.round((lastTokenAt - firstTokenAt) / (appendedCount - 1))
+              : null,
+          toolsCalled,
+          skillsLoaded,
+          eventCount: eventsRead,
+        })
+        setMessages((prev) => {
+          const inputTokens = BASE_TOKENS + Math.ceil(prev.reduce((s, m) => s + m.text.length, 0) / 4)
+          const outputTokens = Math.ceil((prev.find((m) => m.id === assistantId)?.text.length ?? 0) / 4)
+          setTotalCostUsd((c) => c + (inputTokens * 0.15 + outputTokens * 0.60) / 1_000_000)
+          return prev
+        })
+      }
+
+      return { failed: turnFailed, gotText: assistantText.trim().length > 0 }
+    }
+
+    try {
+      const hadStoredSession = !!(sessionIdRef.current || tokenRef.current)
+      let result = await runTurn()
+
+      // Eve dev-runtime snapshots are wiped on recompile; stale localStorage tokens then fail.
+      if ((result.failed || !result.gotText) && hadStoredSession) {
+        clearEveSession()
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, text: '', attachments: [] } : m)),
+        )
+        setStatus('loading')
+        result = await runTurn()
+      }
+
+      if (result.failed || !result.gotText) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, text: CHAT_ERROR_MESSAGE, attachments: [] } : m,
+          ),
+        )
+      }
     } catch (err) {
       console.error('[eve chat]', err)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId ? { ...m, text: CHAT_ERROR_MESSAGE, attachments: [] } : m,
+        ),
+      )
     } finally {
       setStatus('idle')
     }
