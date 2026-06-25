@@ -4,6 +4,7 @@ __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
 .snowflake/
 .v0-trash/
+.workflow-data/
 
 # Eve generated runtime (compile, nitro, dev snapshots)
 .eve/
