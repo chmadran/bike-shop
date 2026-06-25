@@ -43,7 +43,7 @@ export const site = {
   },
   footer: {
     rights: (year: number) =>
-      `© ${year} Vur Selle Bikes. Built for the demo. Any resemblance to your actual fitness level is purely coincidental.`,
+      `© ${year} Vur Selle Bikes. Built for the demo.`,
   },
 } as const
 
