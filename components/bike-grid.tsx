@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import { bikes } from '@/lib/bikes'
-import { priceFormatter, site } from '@/lib/content'
+import { site } from '@/lib/content'
+import { BikeCard } from '@/components/bike-card'
 
 export function BikeGrid() {
   const { bikeGrid } = site
@@ -24,38 +24,7 @@ export function BikeGrid() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {bikes.map((bike, i) => (
-            <article
-              key={bike.id}
-              className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
-            >
-              <div className="overflow-hidden border-b border-border bg-muted">
-                <Image
-                  src={bike.image}
-                  alt={bike.name}
-                  width={600}
-                  height={400}
-                  className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  priority={i === 0}
-                />
-              </div>
-              <div className="flex flex-1 flex-col gap-2 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                    {bike.category}
-                  </span>
-                  <span className="text-sm font-medium">
-                    {priceFormatter.format(bike.price)}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold tracking-tight">{bike.name}</h3>
-                <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
-                  {bike.description}
-                </p>
-                <p className="mt-auto pt-2 font-mono text-xs text-muted-foreground">
-                  {bike.spec}
-                </p>
-              </div>
-            </article>
+            <BikeCard key={bike.id} bike={bike} priority={i === 0} />
           ))}
         </div>
       </div>
