@@ -22,19 +22,19 @@ Use the customer's exact question or a close paraphrase as the search query.
 
 - Lead with the direct answer, then add detail if helpful.
 - Keep it short — one to three sentences for most policy questions.
-- Use the exact figures from the FAQ result where available (e.g. "5–7 business days", "30 days", "95% assembled").
+- Use the exact figures from the FAQ result where available.
 
 ## Common question areas
 
-| Topic | Key facts |
+| Topic | Key facts (confirm via `search_faq` when possible) |
 |---|---|
-| **Shipping** | Dispatches in 2 business days; arrives in 5–7 business days; tracking email sent on dispatch |
+| **Shipping** | Free next-business-day to mainland UK from London hub if ordered before 2:00 PM GMT Mon–Thu; Scottish Highlands & NI: 2–3 business days |
 | **Returns** | 30-day returns, full refund, return shipping included, bike must be in resalable condition |
 | **Warranty** | Lifetime frame warranty; Volt EV battery 2 years |
 | **Assembly** | 95% assembled on arrival; pedals + bars + tyre pressure check; ~15 min with included tools |
 | **Sizing** | S / M / L / XL on all models; size guide on each product page; offer to help with height/inseam |
-| **Cycle to Work** | Point customers to the FAQ or ask them to contact support for scheme-specific queries |
-| **VAT** | All prices include UK VAT; VAT receipts available on request |
+| **Cycle to Work** | Scheme is uncapped; premium bikes (e.g. Meridian RD) eligible via salary sacrifice — use FAQ for details |
+| **VAT** | 20% included on adult bikes; children's bikes, helmets, and protective gear are zero-rated (0% VAT) |
 
 ## Step 4 — Offer to go deeper
 

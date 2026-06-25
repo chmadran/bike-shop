@@ -1,0 +1,41 @@
+{
+  "eventType": "attr_set",
+  "specVersion": 5,
+  "eventData": {
+    "changes": [
+      {
+        "key": "$eve.model",
+        "value": "openai/gpt-4o-mini"
+      },
+      {
+        "key": "$eve.input_tokens",
+        "value": "3043"
+      },
+      {
+        "key": "$eve.output_tokens",
+        "value": "16"
+      },
+      {
+        "key": "$eve.cache_read_tokens",
+        "value": "0"
+      },
+      {
+        "key": "$eve.cache_write_tokens",
+        "value": "0"
+      },
+      {
+        "key": "$eve.tool_count",
+        "value": "14"
+      }
+    ],
+    "writer": {
+      "type": "step",
+      "stepId": "step_01KVZ3TM61RZ9EHAJ0BW8HKP4E",
+      "attempt": 1
+    },
+    "allowReservedAttributes": true
+  },
+  "runId": "wrun_01KVZ3TM61GYS3DRBQNRX6W3Q8",
+  "eventId": "evnt_01KVZ3TPF1BE4YPQ0TRHBRJ40H",
+  "createdAt": "2026-06-25T10:04:54.113Z"
+}

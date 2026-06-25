@@ -1,0 +1,29 @@
+{
+  "eventType": "attr_set",
+  "specVersion": 5,
+  "eventData": {
+    "changes": [
+      {
+        "key": "$eve.type",
+        "value": "session"
+      },
+      {
+        "key": "$eve.trigger",
+        "value": "http"
+      },
+      {
+        "key": "$eve.title",
+        "value": "hello!"
+      }
+    ],
+    "writer": {
+      "type": "step",
+      "stepId": "step_01KVZ4PMZCVA9QGVPCJE20H7MW",
+      "attempt": 1
+    },
+    "allowReservedAttributes": true
+  },
+  "runId": "wrun_01KVZ4PMZC4ZBQE6EGQKK7SQHB",
+  "eventId": "evnt_01KVZ4PMZHDF0RY4VXG0TQN1EC",
+  "createdAt": "2026-06-25T10:20:10.097Z"
+}

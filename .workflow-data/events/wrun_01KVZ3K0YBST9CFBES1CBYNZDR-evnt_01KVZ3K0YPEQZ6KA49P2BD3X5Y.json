@@ -1,0 +1,12 @@
+{
+  "eventType": "step_started",
+  "specVersion": 5,
+  "correlationId": "step_01KVZ3K0YB6PQFAY25YQY5YVVH",
+  "eventData": {
+    "stepName": "step//eve@0.13.4//createSessionStep",
+    "workflowName": "workflow//eve//workflowEntry"
+  },
+  "runId": "wrun_01KVZ3K0YBST9CFBES1CBYNZDR",
+  "eventId": "evnt_01KVZ3K0YPEQZ6KA49P2BD3X5Y",
+  "createdAt": "2026-06-25T10:00:42.710Z"
+}

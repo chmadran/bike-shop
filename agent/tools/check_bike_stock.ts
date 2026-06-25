@@ -25,12 +25,12 @@ export default defineTool({
     const sql = neon(process.env.DATABASE_URL!);
     const slug = normalise(modelName);
 
-    const rows = await sql<StockRow[]>`
+    const rows = (await sql`
       SELECT model_name, warehouse, in_stock, quantity
       FROM bike_stock
       WHERE lower(replace(replace(model_name, '-', ' '), '_', ' ')) = ${slug}
       ORDER BY warehouse
-    `;
+    `) as StockRow[];
 
     if (rows.length === 0) {
       return {

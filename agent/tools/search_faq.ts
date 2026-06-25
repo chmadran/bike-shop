@@ -34,13 +34,13 @@ export default defineTool({
 
     const vectorString = `[${embedding.join(",")}]`;
 
-    const rows = await sql<FaqRow[]>`
+    const rows = (await sql`
       SELECT question, answer,
              1 - (embedding <=> ${vectorString}::vector) AS similarity
       FROM bike_faq
       ORDER BY embedding <=> ${vectorString}::vector
       LIMIT ${limit}
-    `;
+    `) as FaqRow[];
 
     if (rows.length === 0) {
       return { results: [], message: "No relevant FAQ entries found." };

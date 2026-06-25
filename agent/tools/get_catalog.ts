@@ -19,13 +19,13 @@ export default defineTool({
     const sql = neon(process.env.DATABASE_URL!);
 
     // One row per model — pick the first warehouse row for catalog metadata.
-    const rows = await sql<CatalogRow[]>`
+    const rows = (await sql`
       SELECT DISTINCT ON (model_name)
         model_name, category, price_gbp, weight_kg, best_for, spec
       FROM bike_stock
       WHERE price_gbp IS NOT NULL
       ORDER BY model_name, price_gbp ASC
-    `;
+    `) as CatalogRow[];
 
     if (rows.length === 0) {
       return { models: [], message: "No bikes found in the catalog." };

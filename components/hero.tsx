@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import type { Dictionary } from '@/lib/i18n/dictionaries'
+import { site } from '@/lib/content'
 
-export function Hero({ dict }: { dict: Dictionary }) {
-  const { hero } = dict
+export function Hero() {
+  const { hero } = site
 
   return (
     <section className="border-b border-border">
@@ -22,9 +22,6 @@ export function Hero({ dict }: { dict: Dictionary }) {
             <p className="max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {hero.subtitle}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-
-            </div>
 
             <dl className="mt-6 grid w-full max-w-md grid-cols-3 gap-4 border-t border-border pt-6">
               <div>
