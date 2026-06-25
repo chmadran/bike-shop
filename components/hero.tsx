@@ -59,7 +59,7 @@ export function Hero() {
                 width={1200}
                 height={900}
                 priority
-                className="aspect-[4/3] h-full w-full object-contain"
+                className="aspect-square h-full w-full object-cover"
               />
             </div>
           </div>
