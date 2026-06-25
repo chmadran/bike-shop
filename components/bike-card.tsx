@@ -14,7 +14,7 @@ export function BikeCard({ bike, priority }: BikeCardProps) {
       href={`/bikes?bike=${bike.id}`}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
     >
-      <div className="overflow-hidden border-b border-border bg-muted">
+      <div className="overflow-hidden border-b border-border bg-bike-surface">
         <Image
           src={bike.image}
           alt={bike.name}

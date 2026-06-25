@@ -52,14 +52,14 @@ export function Hero() {
           </div>
 
           <div className="relative">
-            <div className="overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-border bg-bike-surface shadow-sm">
               <Image
-                src="/bikes/hero-bike.png"
+                src="/bikes/road-bike.png"
                 alt={hero.imageAlt}
                 width={1200}
                 height={900}
                 priority
-                className="aspect-[4/3] h-full w-full object-cover"
+                className="aspect-[4/3] h-full w-full object-contain"
               />
             </div>
           </div>
