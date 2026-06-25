@@ -36,7 +36,7 @@ export default defineTool({
         name: r.model_name,
         category: r.category,
         priceGbp: r.price_gbp,
-        weightKg: r.weight_kg,
+        weightKg: Number(r.weight_kg),
         bestFor: r.best_for,
         spec: r.spec,
       })),

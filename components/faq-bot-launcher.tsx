@@ -1,11 +1,23 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import type { ChatMessage } from '@/lib/chat-types'
+import {
+  buildRecommendedBikeAttachment,
+  focusModelFromStockInput,
+  inferFocusModelFromText,
+  mergeAttachments,
+  parseCatalogOutput,
+  skillNameFromActionResult,
+  toolNameFromActionResult,
+  type PendingToolCall,
+} from '@/lib/chat-tool-results'
+import { ChatAssistantMessage } from '@/components/chat-assistant-message'
+import { ChatBikeAttachments } from '@/components/chat-bike-attachments'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-type Message = { id: string; role: 'user' | 'assistant'; text: string }
 type Status = 'idle' | 'loading' | 'streaming'
 type View = 'chat' | 'history' | 'internals'
 
@@ -24,7 +36,7 @@ type StoredSession = {
   eveSessionId: string | null
   continuationToken: string | null
   streamIndex: number
-  messages: Message[]
+  messages: ChatMessage[]
   totalCostUsd: number
   createdAt: number
   updatedAt: number
@@ -93,7 +105,7 @@ function ThinkingLoader() {
 // Eve HTTP client hook
 // ---------------------------------------------------------------------------
 function useEveChat() {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [status, setStatus] = useState<Status>('idle')
   const [lastTurn, setLastTurn] = useState<TurnMeta | null>(null)
   const [totalCostUsd, setTotalCostUsd] = useState(0)
@@ -113,7 +125,7 @@ function useEveChat() {
 
   // Return a snapshot of current state for persistence.
   const snapshot = useCallback(
-    (msgs: Message[], cost: number): Omit<StoredSession, 'key' | 'title' | 'createdAt' | 'updatedAt'> => ({
+    (msgs: ChatMessage[], cost: number): Omit<StoredSession, 'key' | 'title' | 'createdAt' | 'updatedAt'> => ({
       eveSessionId: sessionIdRef.current,
       continuationToken: tokenRef.current,
       streamIndex: streamIndexRef.current,
@@ -137,9 +149,9 @@ function useEveChat() {
     const trimmed = text.trim().slice(0, MAX_MESSAGE_LENGTH)
     if (!trimmed) return
 
-    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', text: trimmed }
+    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', text: trimmed }
     const assistantId = crypto.randomUUID()
-    setMessages((prev) => [...prev, userMsg, { id: assistantId, role: 'assistant', text: '' }])
+    setMessages((prev) => [...prev, userMsg, { id: assistantId, role: 'assistant', text: '', attachments: [] }])
     setStatus('loading')
 
     const turnStart = Date.now()
@@ -148,6 +160,25 @@ function useEveChat() {
     let appendedCount = 0
     const toolsCalled: string[] = []
     const skillsLoaded: string[] = []
+    const pendingCalls = new Map<string, PendingToolCall>()
+    let turnCatalog: ReturnType<typeof parseCatalogOutput> = null
+    let focusModel: string | null = null
+    let assistantText = ''
+
+    const applyRecommendedAttachment = () => {
+      const model =
+        focusModel ?? inferFocusModelFromText(assistantText, turnCatalog)
+      const attachment = buildRecommendedBikeAttachment(turnCatalog, model)
+      if (!attachment) return
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, attachments: mergeAttachments(m.attachments, attachment) }
+            : m,
+        ),
+      )
+    }
 
     try {
       const url = sessionIdRef.current
@@ -198,15 +229,71 @@ function useEveChat() {
               lastTokenAt = now
               appendedCount++
               const cumulative = (d.messageSoFar as string | undefined) ?? ''
+              assistantText = cumulative
               setMessages((prev) =>
                 prev.map((m) => (m.id === assistantId ? { ...m, text: cumulative } : m)),
               )
             } else if (ev.type === 'message.completed') {
-              const msg = d.message as { parts?: { type: string; text?: string }[] } | undefined
-              const final = msg?.parts?.filter((p) => p.type === 'text').map((p) => p.text ?? '').join('') ?? ''
-              setMessages((prev) =>
-                prev.map((m) => (m.id === assistantId && final ? { ...m, text: final } : m)),
-              )
+              const final =
+                typeof d.message === 'string'
+                  ? d.message
+                  : (() => {
+                      const msg = d.message as { parts?: { type: string; text?: string }[] } | undefined
+                      return msg?.parts?.filter((p) => p.type === 'text').map((p) => p.text ?? '').join('') ?? ''
+                    })()
+              if (final) {
+                assistantText = final
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === assistantId ? { ...m, text: final } : m)),
+                )
+              }
+            } else if (ev.type === 'actions.requested') {
+              const actions = d.actions as {
+                callId?: string
+                toolName?: string
+                kind?: string
+                input?: unknown
+              }[] | undefined
+              for (const action of actions ?? []) {
+                if (action.kind !== 'tool-call' || !action.toolName) continue
+                if (action.callId) {
+                  pendingCalls.set(action.callId, {
+                    toolName: action.toolName,
+                    input: action.input,
+                  })
+                }
+                const name = toolNameFromActionResult({
+                  kind: 'tool-result',
+                  toolName: action.toolName,
+                })
+                if (name && !toolsCalled.includes(name)) toolsCalled.push(name)
+
+                if (name === 'check_bike_stock') {
+                  const model = focusModelFromStockInput(action.input)
+                  if (model) focusModel = model
+                }
+              }
+            } else if (ev.type === 'action.result' && d.status === 'completed') {
+              const result = (d.result ?? {}) as {
+                kind?: string
+                toolName?: string
+                name?: string
+                output?: unknown
+                callId?: string
+              }
+              const toolName = toolNameFromActionResult(result)
+              if (toolName && !toolsCalled.includes(toolName)) toolsCalled.push(toolName)
+
+              const skillName = skillNameFromActionResult(result)
+              if (skillName && !skillsLoaded.includes(skillName)) skillsLoaded.push(skillName)
+
+              if (toolName === 'check_bike_stock') {
+                const pending = result.callId ? pendingCalls.get(result.callId) : undefined
+                const model = focusModelFromStockInput(pending?.input)
+                if (model) focusModel = model
+              } else if (toolName === 'get_catalog') {
+                turnCatalog = parseCatalogOutput(result.output) ?? turnCatalog
+              }
             } else if (ev.type === 'tool.started' || ev.type === 'turn.tool_called') {
               const name = (d.toolName ?? d.name ?? d.tool) as string | undefined
               if (name && !toolsCalled.includes(name)) toolsCalled.push(name)
@@ -219,6 +306,7 @@ function useEveChat() {
               ev.type === 'session.failed' ||
               ev.type === 'turn.failed'
             ) {
+              applyRecommendedAttachment()
               done = true
             }
           } catch { /* skip malformed lines */ }
@@ -226,6 +314,7 @@ function useEveChat() {
       }
 
       reader.cancel()
+      applyRecommendedAttachment()
       streamIndexRef.current += eventsRead
       setLastTurn({
         totalMs: Date.now() - turnStart,
@@ -364,11 +453,11 @@ function FluidComputeBar({ lastTurn }: { lastTurn: TurnMeta }) {
 // ---------------------------------------------------------------------------
 // Agent info panel
 // ---------------------------------------------------------------------------
-function estimateTokens(messages: Message[]): number {
+function estimateTokens(messages: ChatMessage[]): number {
   return Math.ceil(messages.reduce((sum, m) => sum + m.text.length, 0) / 4)
 }
 
-function AgentInfoPanel({ lastTurn, messages, totalCostUsd }: { lastTurn: TurnMeta | null; messages: Message[]; totalCostUsd: number }) {
+function AgentInfoPanel({ lastTurn, messages, totalCostUsd }: { lastTurn: TurnMeta | null; messages: ChatMessage[]; totalCostUsd: number }) {
   const skillTokens =
     (lastTurn?.skillsLoaded.includes('faq_guide') ? CTX.skillFaqGuide : 0) +
     (lastTurn?.skillsLoaded.includes('purchase_advisor') ? CTX.skillPurchaseAdvisor : 0)
@@ -603,16 +692,37 @@ export function FaqBotLauncher() {
                   </p>
                 )}
                 {messages.map((msg) => {
-                  if (msg.role === 'assistant' && msg.text === '') return null
+                  const catalog = msg.attachments?.find((item) => item.type === 'catalog')
+                  const hasContent = msg.text.length > 0 || Boolean(catalog)
+                  if (msg.role === 'assistant' && !hasContent) return null
+
+                  const isUser = msg.role === 'user'
                   return (
-                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-foreground text-background' : 'bg-muted text-foreground'}`}>
-                        <span className="whitespace-pre-wrap animate-[fadein_0.15s_ease-in]">{msg.text}</span>
+                    <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[92%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                          isUser ? 'max-w-[80%] bg-foreground text-background' : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        {!isUser && catalog && (
+                          <div className="mb-3 border-b border-border pb-3">
+                            <ChatBikeAttachments models={catalog.models} />
+                          </div>
+                        )}
+                        {msg.text ? (
+                          isUser ? (
+                            <span className="whitespace-pre-wrap">{msg.text}</span>
+                          ) : (
+                            <div className="animate-[fadein_0.15s_ease-in]">
+                              <ChatAssistantMessage text={msg.text} />
+                            </div>
+                          )
+                        ) : null}
                       </div>
                     </div>
                   )
                 })}
-                {isBusy && messages.at(-1)?.text === '' && (
+                {isBusy && messages.at(-1)?.text === '' && !messages.at(-1)?.attachments?.length && (
                   <div className="flex justify-start">
                     <div className="rounded-lg bg-muted px-3 py-2"><ThinkingLoader /></div>
                   </div>

@@ -21,7 +21,7 @@ Don't ask all four at once. If context already answers one, skip it.
 
 Call `get_catalog` to get the current models, prices, and weights before making any recommendation. Use the live data — do not rely on memorised prices or specs.
 
-Present the options as a table (model, best for, weight, price in GBP). Filter out any models marked unavailable.
+Present a brief summary in Markdown. The chat UI renders `get_catalog` results as live product cards automatically, so you do not need a full markdown table when the whole lineup is shown.
 
 ### Quick decision rules
 
