@@ -1,16 +1,15 @@
 import Image from 'next/image'
+import Link from 'next/link'
+import { AddToBasketButton } from '@/components/add-to-basket-button'
 import type { CatalogModel } from '@/lib/chat-types'
-import { bikes } from '@/lib/bikes'
+import { bikeDetailPath, findBikeByName } from '@/lib/bikes'
 import { priceFormatter } from '@/lib/content'
 
-function findBikeImage(modelName: string): string | null {
-  const bike = bikes.find((item) => item.name.toLowerCase() === modelName.toLowerCase())
-  return bike?.image ?? null
-}
-
 function ChatBikeCard({ model }: { model: CatalogModel }) {
-  const image = findBikeImage(model.name)
+  const bike = findBikeByName(model.name)
+  const image = bike?.image ?? null
   const spec = model.spec ?? `${model.weightKg} kg`
+  const detailHref = bikeDetailPath(model.name)
 
   return (
     <article className="flex gap-3 rounded-md border border-border bg-background/50 p-2">
@@ -37,6 +36,17 @@ function ChatBikeCard({ model }: { model: CatalogModel }) {
           {model.bestFor}
         </p>
         <p className="mt-1 font-mono text-[10px] text-muted-foreground">{spec}</p>
+        <div className="mt-2 flex flex-col gap-2">
+          {detailHref && (
+            <Link
+              href={detailHref}
+              className="inline-flex w-full items-center justify-center rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
+            >
+              More details
+            </Link>
+          )}
+          {bike && <AddToBasketButton bikeId={bike.id} size="sm" className="w-full" />}
+        </div>
       </div>
     </article>
   )

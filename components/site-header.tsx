@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import { SiteBasketLink } from '@/components/site-basket-link'
 import { site } from '@/lib/content'
 import { V0Logo } from '@/components/v0-logo'
 
 export function SiteHeader() {
-  const { nav, shop } = site.header
+  const { nav } = site.header
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -24,12 +25,7 @@ export function SiteHeader() {
           </a>
         </nav>
 
-        <a
-          href="#bikes"
-          className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-        >
-          {shop}
-        </a>
+        <SiteBasketLink />
       </div>
     </header>
   )

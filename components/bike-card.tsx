@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import type { Bike } from '@/lib/bikes'
 import { priceFormatter } from '@/lib/content'
 
@@ -9,7 +10,10 @@ type BikeCardProps = {
 
 export function BikeCard({ bike, priority }: BikeCardProps) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30">
+    <Link
+      href={`/bikes?bike=${bike.id}`}
+      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
+    >
       <div className="overflow-hidden border-b border-border bg-muted">
         <Image
           src={bike.image}
@@ -36,7 +40,10 @@ export function BikeCard({ bike, priority }: BikeCardProps) {
         <p className="mt-auto pt-2 font-mono text-xs text-muted-foreground">
           {bike.spec}
         </p>
+        <span className="pt-1 text-xs font-medium text-foreground group-hover:underline">
+          More details
+        </span>
       </div>
-    </article>
+    </Link>
   )
 }
