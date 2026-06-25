@@ -6,12 +6,12 @@ import { priceFormatter } from '@/lib/content'
 export function BikeDetailPanel({ bike }: { bike: Bike }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card animate-[fadein_0.2s_ease-in]">
-      <div className="relative aspect-[3/2] bg-muted sm:aspect-[21/9]">
+      <div className="relative aspect-[4/3] bg-muted sm:aspect-[16/9]">
         <Image
           src={bike.image}
           alt={bike.name}
           fill
-          className="object-contain p-6"
+          className="object-contain p-2"
           sizes="(max-width: 768px) 100vw, 896px"
           priority
         />
