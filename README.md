@@ -2,7 +2,7 @@
 
 A UK bike-shop demo built for a Vercel Solutions Architect review: a **Next.js marketing site** (Frontend Cloud) plus an **Eve-powered FAQ and purchase advisor** (AI Cloud), with live inventory from Neon, tag-based catalog caching, and Stripe Checkout.
 
-**Live demo:** _[add your Vercel deployment URL]_
+Live demo: https://bike-shop-iota.vercel.app/ 
 
 ---
 
@@ -21,29 +21,14 @@ A UK bike-shop demo built for a Vercel Solutions Architect review: a **Next.js m
 
 ## Architecture
 
-```mermaid
-flowchart TB
-  Browser[Browser]
-  Next[Next.js 16 + withEve]
-  Eve[Eve agent]
-  Gateway[Vercel AI Gateway]
-  Neon[(Neon Postgres)]
-  Stripe[Stripe Checkout]
+Three separate paths share one Neon database but do not all go through Eve:
 
-  Browser --> Next
-  Next --> Eve
-  Eve --> Gateway
-  Eve --> search_faq
-  Eve --> get_catalog
-  Eve --> check_bike_stock
-  search_faq --> Neon
-  get_catalog --> Neon
-  check_bike_stock --> Neon
-  Next --> bikes_catalog[lib/bikes-catalog.ts]
-  bikes_catalog --> Neon
-  Browser --> Stripe
-  Next --> Stripe
-```
+| Path | What happens |
+|------|----------------|
+| **Browse** | RSC pages read the catalog through `lib/bikes-catalog.ts` (tagged `unstable_cache`, on-demand revalidate). |
+| **Chat** | The FAQ widget streams NDJSON from Eve (`/eve/v1/session*`), rate-limited by `proxy.ts`. The agent calls tools that query Neon; the LLM (and FAQ embeddings) go through Vercel AI Gateway. |
+| **Checkout** | Basket lives in `localStorage`; `POST /api/checkout` validates prices from the same catalog cache, then redirects the browser to Stripe Hosted Checkout. |
+
 
 **Agent tools**
 
@@ -53,7 +38,7 @@ flowchart TB
 | `get_catalog` | `bike_stock` (distinct on `model_id`) |
 | `check_bike_stock` | `bike_stock` per warehouse |
 
-**Stack:** Next.js 16 · React 19 · Eve 0.13.4 · AI SDK + Gateway · Neon · Stripe · Tailwind 4 · Geist
+**Stack:** Next.js 16 · Eve 0.13.4 · AI SDK + Gateway · Neon · Stripe  
 
 ---
 
@@ -61,9 +46,9 @@ flowchart TB
 
 ```
 bike-shop/
-├── agent/                 # Eve agent (filesystem-first)
+├── agent/                 # Eve agent 
 │   ├── agent.ts           # Model + AI Gateway failover
-│   ├── instructions.md    # Always-on system prompt
+│   ├── instructions.md    # Agent personnality, always-on system prompt
 │   ├── channels/eve.ts    # Auth (local dev, OIDC, public browser)
 │   ├── skills/            # faq_guide, purchase_advisor
 │   └── tools/             # search_faq, get_catalog, check_bike_stock
@@ -72,7 +57,11 @@ bike-shop/
 │   ├── api/revalidate/    # On-demand ISR (tag `bikes`)
 │   ├── basket/
 │   └── bikes/             # Grid + ?bike={modelId} detail
-├── components/            # UI including faq-bot-launcher.tsx
+├── components/
+│   ├── chat/              # FAQ widget (launcher, stream UI, internals)
+│   ├── basket/            # Cart + checkout button
+│   ├── bike/              # Catalog cards and detail
+│   └── site/              # Header, footer, hero, features
 ├── data/
 │   └── bike-catalog.json  # Seed + static image paths
 ├── lib/
@@ -198,7 +187,7 @@ On Vercel, add `REVALIDATE_SECRET` to project env vars and use your production U
 
 **Scope:** UK shop only; out-of-scope questions are redirected ([`agent/instructions.md`](agent/instructions.md)).
 
-**Chat UX:** [`components/faq-bot-launcher.tsx`](components/faq-bot-launcher.tsx) streams Eve events, shows a single recommended product card (not a full catalog dump), and retries once if stale session tokens fail after a dev restart.
+**Chat UX:** [`components/chat/faq-bot-launcher.tsx`](components/chat/faq-bot-launcher.tsx) streams Eve events, shows a single recommended product card (not a full catalog dump), and retries once if stale session tokens fail after a dev restart.
 
 ---
 
@@ -258,7 +247,7 @@ Requires `DATABASE_URL` and AI Gateway credentials for embedding cases.
 1. [`next.config.mjs`](next.config.mjs) — `withEve()`
 2. [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) — RAG
 3. [`lib/bikes-catalog.ts`](lib/bikes-catalog.ts) — tag ISR from Neon
-4. [`components/faq-bot-launcher.tsx`](components/faq-bot-launcher.tsx) — streaming + attachments
+4. [`components/chat/faq-bot-launcher.tsx`](components/chat/faq-bot-launcher.tsx) — widget shell; [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) — streaming + attachments
 5. [`agent/channels/eve.ts`](agent/channels/eve.ts) — channel auth
 
 ---

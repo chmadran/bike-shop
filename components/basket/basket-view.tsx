@@ -2,11 +2,11 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
-import { FaqBotLauncher } from '@/components/faq-bot-launcher'
-import { BasketCheckoutButton } from '@/components/basket-checkout-button'
-import { useBasket } from '@/components/basket-provider'
+import { SiteHeader } from '@/components/site/site-header'
+import { SiteFooter } from '@/components/site/site-footer'
+import { FaqBotLauncher } from '@/components/chat/faq-bot-launcher'
+import { BasketCheckoutButton } from '@/components/basket/basket-checkout-button'
+import { useBasket } from '@/components/basket/basket-provider'
 import type { Bike } from '@/lib/bike-types'
 import { priceFormatter } from '@/lib/content'
 

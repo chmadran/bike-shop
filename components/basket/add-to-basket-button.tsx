@@ -1,6 +1,6 @@
 'use client'
 
-import { useBasket } from '@/components/basket-provider'
+import { useBasket } from '@/components/basket/basket-provider'
 
 type AddToBasketButtonProps = {
   bikeId: string

@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
-import { FaqBotLauncher } from '@/components/faq-bot-launcher'
+import { SiteHeader } from '@/components/site/site-header'
+import { SiteFooter } from '@/components/site/site-footer'
+import { FaqBotLauncher } from '@/components/chat/faq-bot-launcher'
 
 export default function CheckoutCancelPage() {
   return (

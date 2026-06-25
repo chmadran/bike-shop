@@ -1,6 +1,6 @@
 import { getCachedBikeCatalog } from '@/lib/bikes-catalog'
 import { site } from '@/lib/content'
-import { BikeCard } from '@/components/bike-card'
+import { BikeCard } from '@/components/bike/bike-card'
 
 export async function BikeGrid() {
   const bikes = await getCachedBikeCatalog()

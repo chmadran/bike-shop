@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AddToBasketButton } from '@/components/add-to-basket-button'
+import { AddToBasketButton } from '@/components/basket/add-to-basket-button'
 import type { CatalogModel } from '@/lib/chat-types'
 import { bikeDetailPath } from '@/lib/bike-paths'
 import { priceFormatter } from '@/lib/content'

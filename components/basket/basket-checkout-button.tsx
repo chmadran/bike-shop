@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useBasket } from '@/components/basket-provider'
+import { useBasket } from '@/components/basket/basket-provider'
 
 export function BasketCheckoutButton() {
   const { items } = useBasket()

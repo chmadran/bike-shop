@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
-import { useBasket } from '@/components/basket-provider'
+import { useBasket } from '@/components/basket/basket-provider'
 
 export function SiteBasketLink() {
   const { count } = useBasket()

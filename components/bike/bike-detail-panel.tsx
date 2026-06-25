@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { AddToBasketButton } from '@/components/add-to-basket-button'
+import { AddToBasketButton } from '@/components/basket/add-to-basket-button'
 import type { Bike } from '@/lib/bike-types'
 import { priceFormatter } from '@/lib/content'
 

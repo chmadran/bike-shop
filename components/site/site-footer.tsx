@@ -1,5 +1,5 @@
 import { site } from '@/lib/content'
-import { V0Logo } from '@/components/v0-logo'
+import { V0Logo } from '@/components/site/v0-logo'
 
 export function SiteFooter() {
   return (

@@ -1,5 +1,5 @@
 import { getCachedBikeCatalog } from '@/lib/bikes-catalog'
-import { BasketView } from '@/components/basket-view'
+import { BasketView } from '@/components/basket/basket-view'
 
 export const dynamic = 'force-dynamic'
 

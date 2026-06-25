@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { SiteBasketLink } from '@/components/site-basket-link'
+import { SiteBasketLink } from '@/components/basket/site-basket-link'
 import { site } from '@/lib/content'
-import { V0Logo } from '@/components/v0-logo'
+import { V0Logo } from '@/components/site/v0-logo'
 
 export function SiteHeader() {
   const { nav } = site.header

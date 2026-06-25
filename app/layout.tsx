@@ -1,4 +1,4 @@
-import { BasketProvider } from '@/components/basket-provider'
+import { BasketProvider } from '@/components/basket/basket-provider'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
