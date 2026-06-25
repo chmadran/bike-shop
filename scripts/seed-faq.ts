@@ -41,18 +41,28 @@ const rawFAQs = [
 export async function seedVectorDatabase() {
   const sql = neon(process.env.DATABASE_URL!);
 
-  console.log("Clearing bike_faq and generating embeddings via AI Gateway...");
-  await sql`DELETE FROM bike_faq`;
+  const existingRows = (await sql`
+    SELECT question FROM bike_faq
+  `) as { question: string }[];
+  const existingQuestions = new Set(existingRows.map((r) => r.question));
+
+  const toInsert = rawFAQs.filter((faq) => !existingQuestions.has(faq.question));
+  if (toInsert.length === 0) {
+    console.log("No new FAQs to insert — all questions in rawFAQs already exist in bike_faq.");
+    return;
+  }
+
+  console.log(
+    `Embedding ${toInsert.length} new FAQ(s) via AI Gateway (${rawFAQs.length - toInsert.length} skipped, already in DB)...`,
+  );
 
   const { embeddings } = await embedMany({
     model: gateway.embeddingModel("openai/text-embedding-3-small"),
-    values: rawFAQs.map((faq) => faq.answer),
+    values: toInsert.map((faq) => faq.answer),
   });
 
-  console.log(`Inserting ${embeddings.length} FAQ vectors into Neon...`);
-
-  for (let i = 0; i < rawFAQs.length; i++) {
-    const faq = rawFAQs[i];
+  for (let i = 0; i < toInsert.length; i++) {
+    const faq = toInsert[i];
     const vectorString = `[${embeddings[i].join(",")}]`;
 
     await sql`
@@ -61,7 +71,7 @@ export async function seedVectorDatabase() {
     `;
   }
 
-  console.log("bike_faq seeded successfully.");
+  console.log(`Inserted ${toInsert.length} FAQ vector(s) into bike_faq.`);
 }
 
 async function main() {
