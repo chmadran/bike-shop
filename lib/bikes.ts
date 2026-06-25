@@ -27,7 +27,7 @@ export const bikes: Bike[] = [
     description:
       'Full suspension for when the trail gets spicy and your confidence gets mild. Eats roots for breakfast. Does not eat mud pies.',
     image: '/bikes/mountain-bike.png',
-    spec: '13.4 kg · 150mm travel · 12-speed · 1 spare ego',
+    spec: '13.4 kg · 150mm travel · 12-speed',
   },
   {
     id: 'district-cb',
@@ -37,7 +37,7 @@ export const bikes: Bike[] = [
     description:
       'The sensible choice. Belt drive, low fuss, fits in a flat share hallway. Your housemates will still leave it behind the bins anyway.',
     image: '/bikes/city-bike.png',
-    spec: '11.0 kg · Belt drive · 8-speed · cup holder compatible*',
+    spec: '11.0 kg · Belt drive · 8-speed · cup holder',
   },
   {
     id: 'volt-ev',
@@ -47,6 +47,6 @@ export const bikes: Bike[] = [
     description:
       'Hills? What hills? Arrive at the office looking fresh, not like you wrestled a weather system. Battery good for longer than your smartphone.',
     image: '/bikes/electric-bike.png',
-    spec: '19.5 kg · 90 km range · 250W motor · smug mode: ON',
+    spec: '19.5 kg · 90 km range · 250W motor · lazy',
   },
 ]
