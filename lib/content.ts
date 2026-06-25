@@ -25,19 +25,19 @@ export const site = {
     items: [
       {
         title: 'Free 30-day returns',
-        body: 'Ride it for a month. If it is not the one, send it back on us. No awkward break-up speech required.',
+        body: 'Ride it for a month. If it is not the one, send it back on us.',
       },
       {
         title: 'Shipped ready to ride',
-        body: '95% assembled out of the box. The other 5% is attaching your dignity after telling friends you are "getting into cycling".',
+        body: '95% assembled out of the box.',
       },
       {
         title: 'Lifetime frame warranty',
-        body: 'Every Vur Selle frame is covered for as long as you own the bike. Your New Year\'s resolutions are not, sadly.',
+        body: 'Every Vur Selle frame is covered for as long as you own the bike.',
       },
       {
         title: 'Free annual tune-up',
-        body: 'Bring it to any partner shop once a year. They will tighten bolts; we will pretend you always stored it indoors.',
+        body: 'Bring it to any partner shop once a year. They will tighten bolts.',
       },
     ],
   },
