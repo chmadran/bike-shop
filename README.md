@@ -46,12 +46,18 @@ Three separate paths share one Neon database but do not all go through Eve:
 
 ```
 bike-shop/
-├── agent/                 # Eve agent 
+├── agent/                 # Eve agent
 │   ├── agent.ts           # Model + AI Gateway failover
-│   ├── instructions.md    # Agent personnality, always-on system prompt
+│   ├── instructions.md    # Agent personality, always-on system prompt
 │   ├── channels/eve.ts    # Auth (local dev, OIDC, public browser)
+│   ├── eval/              # Eve evals (*.eval.ts)
+│   │   ├── evals.config.ts
+│   │   ├── scope.eval.ts           # off-topic + prompt injection
+│   │   ├── district-cb-price.eval.ts  # price hallucination (£1,450)
+│   │   └── lib/                    # assertions + catalog preflight
 │   ├── skills/            # faq_guide, purchase_advisor
 │   └── tools/             # search_faq, get_catalog, check_bike_stock
+├── evals -> agent/eval     # Symlink — Eve CLI discovers evals/ at app root only
 ├── app/                   # Next.js App Router
 │   ├── api/checkout/      # Stripe Checkout session
 │   ├── api/revalidate/    # On-demand ISR (tag `bikes`)
@@ -148,7 +154,7 @@ Open [http://localhost:3000](http://localhost:3000). Chat widget is bottom-right
 | `pnpm lint` | ESLint |
 | `pnpm seed` | Seed stock + FAQ |
 | `pnpm seed:stock` / `pnpm seed:faq` | Seed one table |
-| `pnpm eval` | RAG + catalog price regression |
+| `pnpm eval` | Run Eve agent evals (scope + District CB price) |
 
 ---
 
@@ -203,77 +209,26 @@ Checkout line items are resolved server-side from the cached catalog ([`app/api/
 
 ## Evaluation
 
+Evals live in [`agent/eval/`](agent/eval/). Eve discovers only a top-level `evals/` folder, so this repo symlinks **`evals` → `agent/eval`**.
+
+**Prerequisites:** `pnpm seed`, `DATABASE_URL` in `.env.local`, and **`pnpm dev` running** in another terminal.
+
 ```bash
-pnpm eval
+pnpm dev    # terminal 1
+pnpm eval   # terminal 2 — 3 cases across 2 eval files
 ```
 
-1. **RAG regression** — golden queries against `search_faq` ([`eval/golden-set.json`](eval/golden-set.json))
-2. **Catalog price check** — `bike_stock` prices match `data/bike-catalog.json`
-3. **Manual rubric** — routing/scope cases printed at the end
+| File | What it checks |
+|------|----------------|
+| [`scope.eval.ts`](agent/eval/scope.eval.ts) | Off-topic redirect; prompt-injection refusal without leaking instructions |
+| [`district-cb-price.eval.ts`](agent/eval/district-cb-price.eval.ts) | Neon catalog matches seed; agent calls `get_catalog` and quotes **£1,450** for District CB (not £999 / £1,999 / £2,500) |
 
-Requires `DATABASE_URL` and AI Gateway credentials for embedding cases.
+Against a deployed app:
 
----
+```bash
+pnpm exec eve eval --url https://your-app.vercel.app
+```
 
-## Deploy on Vercel
 
-1. Push repo and import in Vercel
-2. Set env vars from `.env.example` (especially `DATABASE_URL`, `REVALIDATE_SECRET`, Stripe keys)
-3. Deploy — `withEve()` in [`next.config.mjs`](next.config.mjs) bundles the agent
-4. Run `pnpm seed` against production Neon (or seed locally pointing at prod DB once)
-5. Call `/api/revalidate?tag=bikes` after catalog changes
 
-**Rate limiting:** [`proxy.ts`](proxy.ts) limits `/eve/v1/session*` to 10 req/min/IP (in-process; use Vercel KV for durable limits in production).
 
----
-
-## 15-minute demo script
-
-| Step | Action | Point to make |
-|------|--------|---------------|
-| 1 | Homepage | RSC catalog from Neon + cached tags; chat is the main client island |
-| 2 | Chat → **Internals** | Latency, tools, cost |
-| 3 | *"Is VAT included in UK pricing?"* | `search_faq` + `faq_guide` — grounded |
-| 4 | *"I commute in London, budget ~£2k — which bike?"* | `purchase_advisor` → `get_catalog` → `check_bike_stock` + product card |
-| 5 | **More details** / **Add to basket** | `model_id` URLs and basket |
-| 6 | Stripe checkout (test card) | Commerce path |
-| 7 | `pnpm eval` | Automated checks |
-| 8 | *"Who won the World Cup?"* | Out-of-scope redirect |
-
----
-
-## Code walkthrough (five files)
-
-1. [`next.config.mjs`](next.config.mjs) — `withEve()`
-2. [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) — RAG
-3. [`lib/bikes-catalog.ts`](lib/bikes-catalog.ts) — tag ISR from Neon
-4. [`components/chat/faq-bot-launcher.tsx`](components/chat/faq-bot-launcher.tsx) — widget shell; [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) — streaming + attachments
-5. [`agent/channels/eve.ts`](agent/channels/eve.ts) — channel auth
-
----
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Chat fails after `pnpm dev` restart | Click **New chat** or clear `vs_sessions` in localStorage |
-| Stale bike prices/images | `POST /api/revalidate?tag=bikes` or `rm -rf .next && pnpm dev` |
-| `column "image" does not exist` | Run [`scripts/migrate-catalog.sql`](scripts/migrate-catalog.sql), then `pnpm seed:stock` |
-| Stripe "Not a valid URL" | Set `NEXT_PUBLIC_SITE_URL` with protocol |
-| Wrong images after replacing PNGs | Same filename replaces file on disk; clear `.next/cache` or hard-refresh |
-
----
-
-## Known limitations
-
-- English-only UK shop
-- Basket is client-side (`localStorage` key `vs_basket`); no server cart
-- No `bike_models` table — catalog is denormalized on `bike_stock.model_id`
-- In-process rate limit (not durable across all serverless instances)
-- Eve session tokens can invalidate on local recompile
-
----
-
-## License
-
-Private demo project.

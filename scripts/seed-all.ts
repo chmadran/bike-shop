@@ -17,7 +17,7 @@ async function main() {
   console.log("\nSeeding bike_faq (embeddings via AI Gateway)...");
   await seedVectorDatabase();
 
-  console.log("\nDone. Run `pnpm eval` to verify.");
+  console.log("\nDone. Run `pnpm dev` then `pnpm eval` to verify.");
 }
 
 main().catch((err) => {

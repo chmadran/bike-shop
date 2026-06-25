@@ -11,7 +11,7 @@
     "seed": "tsx --env-file=.env.local scripts/seed-all.ts",
     "seed:faq": "tsx --env-file=.env.local scripts/seed-faq.ts",
     "seed:stock": "tsx --env-file=.env.local scripts/seed-stock.ts",
-    "eval": "tsx --env-file=.env.local scripts/eval-rag.ts"
+    "eval": "eve eval"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
