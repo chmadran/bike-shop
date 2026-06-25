@@ -11,7 +11,7 @@ export function BikeDetailPanel({ bike }: { bike: Bike }) {
           src={bike.image}
           alt={bike.name}
           fill
-          className="object-cover"
+          className="object-contain p-6"
           sizes="(max-width: 768px) 100vw, 896px"
           priority
         />
