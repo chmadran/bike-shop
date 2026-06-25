@@ -15,9 +15,9 @@ export const bikes: Bike[] = [
     category: 'Road',
     price: 3200,
     description:
-      'A featherweight carbon road bike tuned for long climbs and fast descents.',
+      'So light your Strava followers will assume you edited the elevation. Built for climbs, descents, and pretending the headwind is "character building".',
     image: '/bikes/road-bike.png',
-    spec: '7.1 kg · Carbon · 22-speed',
+    spec: '7.1 kg · Carbon · 22-speed · 0 excuses',
   },
   {
     id: 'summit-tr',
@@ -25,9 +25,9 @@ export const bikes: Bike[] = [
     category: 'Mountain',
     price: 4100,
     description:
-      'Full-suspension trail bike that soaks up rough terrain without slowing you down.',
+      'Full suspension for when the trail gets spicy and your confidence gets mild. Eats roots for breakfast. Does not eat mud pies.',
     image: '/bikes/mountain-bike.png',
-    spec: '13.4 kg · 150mm travel · 12-speed',
+    spec: '13.4 kg · 150mm travel · 12-speed · 1 spare ego',
   },
   {
     id: 'district-cb',
@@ -35,9 +35,9 @@ export const bikes: Bike[] = [
     category: 'City',
     price: 1450,
     description:
-      'A clean, low-maintenance commuter built for daily city rides and easy parking.',
+      'The sensible choice. Belt drive, low fuss, fits in a flat share hallway. Your housemates will still leave it behind the bins anyway.',
     image: '/bikes/city-bike.png',
-    spec: '11.0 kg · Belt drive · 8-speed',
+    spec: '11.0 kg · Belt drive · 8-speed · cup holder compatible*',
   },
   {
     id: 'volt-ev',
@@ -45,8 +45,8 @@ export const bikes: Bike[] = [
     category: 'Electric',
     price: 3850,
     description:
-      'An electric bike with an integrated battery and a 90 km range for effortless miles.',
+      'Hills? What hills? Arrive at the office looking fresh, not like you wrestled a weather system. Battery good for longer than your smartphone.',
     image: '/bikes/electric-bike.png',
-    spec: '19.5 kg · 90 km range · 250W motor',
+    spec: '19.5 kg · 90 km range · 250W motor · smug mode: ON',
   },
 ]

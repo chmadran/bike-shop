@@ -604,7 +604,7 @@ export function FaqBotLauncher() {
               <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
                 {messages.length === 0 && (
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                    Ask me anything about shipping, sizing, returns, or stock availability.
+                    Ask me anything about shipping, sizing, returns, or stock. I promise not to recommend a unicycle.
                   </p>
                 )}
                 {messages.map((msg) => {
@@ -627,7 +627,7 @@ export function FaqBotLauncher() {
               <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-border px-3 py-2">
                 <input
                   name="message"
-                  placeholder="Ask a question…"
+                  placeholder="e.g. Will this bike make me faster, or just louder on group rides?"
                   disabled={isBusy}
                   autoComplete="off"
                   maxLength={MAX_MESSAGE_LENGTH}
