@@ -73,24 +73,19 @@ const CTX = {
 const BASE_TOKENS = CTX.instructions + CTX.toolSearchFaq + CTX.toolGetCatalog + CTX.toolCheckStock
 
 // ---------------------------------------------------------------------------
-// Bike loader
+// Thinking loader
 // ---------------------------------------------------------------------------
-function BikeLoader() {
+function ThinkingLoader() {
   return (
-    <svg viewBox="0 0 64 32" className="h-5 w-10" aria-label="Thinking…">
-      <circle cx="12" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
-      <circle cx="52" cy="22" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4" />
-      <polyline points="12,22 24,8 36,8 52,22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="24" y1="8" x2="28" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <line x1="33" y1="8" x2="40" y2="8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="48" y1="10" x2="55" y2="10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="52" y1="10" x2="52" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="4"  cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_0ms]" />
-      <circle cx="18" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_150ms]" />
-      <circle cx="32" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_300ms]" />
-      <circle cx="46" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_450ms]" />
-      <circle cx="60" cy="30" r="1.5" fill="currentColor" opacity="0.3" className="animate-[roadpulse_0.9s_ease-in-out_infinite_600ms]" />
-    </svg>
+    <div className="flex items-center gap-1.5" role="status" aria-label="Thinking…">
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="h-1.5 w-1.5 rounded-full bg-current opacity-40 animate-[fadein_0.9s_ease-in-out_infinite]"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
+    </div>
   )
 }
 
@@ -619,7 +614,7 @@ export function FaqBotLauncher() {
                 })}
                 {isBusy && messages.at(-1)?.text === '' && (
                   <div className="flex justify-start">
-                    <div className="rounded-lg bg-muted px-3 py-2"><BikeLoader /></div>
+                    <div className="rounded-lg bg-muted px-3 py-2"><ThinkingLoader /></div>
                   </div>
                 )}
                 <div ref={bottomRef} />
