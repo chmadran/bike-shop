@@ -15,9 +15,9 @@ export const bikes: Bike[] = [
     category: 'Road',
     price: 3200,
     description:
-      'So light your Strava followers will assume you edited the elevation. Built for climbs, descents, and pretending the headwind is "character building".',
+      'So light, it is life changing. Next thing you know you are spending 100 pounds a month on bike gears.',
     image: '/bikes/road-bike.png',
-    spec: '7.1 kg · Carbon · 22-speed · 0 excuses',
+    spec: '7.1 kg · Carbon · 22-speed',
   },
   {
     id: 'summit-tr',
@@ -25,7 +25,7 @@ export const bikes: Bike[] = [
     category: 'Mountain',
     price: 4100,
     description:
-      'Full suspension for when the trail gets spicy and your confidence gets mild. Eats roots for breakfast. Does not eat mud pies.',
+      'Full suspension for when the trail gets spicy and your confidence gets mild.',
     image: '/bikes/mountain-bike.png',
     spec: '13.4 kg · 150mm travel · 12-speed',
   },
@@ -35,9 +35,9 @@ export const bikes: Bike[] = [
     category: 'City',
     price: 1450,
     description:
-      'The sensible choice. Belt drive, low fuss, fits in a flat share hallway. Your housemates will still leave it behind the bins anyway.',
+      'The sensible choice, fits its in a flat share hallway.',
     image: '/bikes/city-bike.png',
-    spec: '11.0 kg · Belt drive · 8-speed · cup holder',
+    spec: '11.0 kg · Belt drive · 8-speed',
   },
   {
     id: 'volt-ev',
@@ -45,8 +45,8 @@ export const bikes: Bike[] = [
     category: 'Electric',
     price: 3850,
     description:
-      'Hills? What hills? Arrive at the office looking fresh, not like you wrestled a weather system. Battery good for longer than your smartphone.',
+      'Feeling a bit lazy? Arrive at the office looking fresh. Battery good for longer than your smartphone.',
     image: '/bikes/electric-bike.png',
-    spec: '19.5 kg · 90 km range · 250W motor · lazy',
+    spec: '19.5 kg · 90 km range · 250W motor',
   },
 ]
