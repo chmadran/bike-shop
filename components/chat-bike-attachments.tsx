@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import { AddToBasketButton } from '@/components/add-to-basket-button'
 import type { CatalogModel } from '@/lib/chat-types'
-import { bikeDetailPath, findBikeByName } from '@/lib/bikes'
+import { bikeDetailPath } from '@/lib/bike-paths'
 import { priceFormatter } from '@/lib/content'
 
 function ChatBikeCard({ model }: { model: CatalogModel }) {
-  const bike = findBikeByName(model.name)
   const spec = model.spec ?? `${model.weightKg} kg`
-  const detailHref = bikeDetailPath(model.name)
+  const detailHref = bikeDetailPath(model.modelId)
 
   return (
     <article className="rounded-lg border border-border bg-background p-3">
@@ -25,15 +24,13 @@ function ChatBikeCard({ model }: { model: CatalogModel }) {
       </p>
       <p className="mt-1 font-mono text-[10px] text-muted-foreground">{spec}</p>
       <div className="mt-3 flex flex-col gap-2">
-        {detailHref && (
-          <Link
-            href={detailHref}
-            className="inline-flex w-full items-center justify-center rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
-          >
-            More details
-          </Link>
-        )}
-        {bike && <AddToBasketButton bikeId={bike.id} size="sm" className="w-full" />}
+        <Link
+          href={detailHref}
+          className="inline-flex w-full items-center justify-center rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
+        >
+          More details
+        </Link>
+        <AddToBasketButton bikeId={model.modelId} size="sm" className="w-full" />
       </div>
     </article>
   )
@@ -46,7 +43,7 @@ export function ChatBikeAttachments({ models }: { models: CatalogModel[] }) {
         Recommended
       </p>
       {models.map((model) => (
-        <ChatBikeCard key={model.name} model={model} />
+        <ChatBikeCard key={model.modelId} model={model} />
       ))}
     </div>
   )

@@ -1,0 +1,66 @@
+[
+  {
+    "modelId": "meridian-rd",
+    "name": "Meridian RD",
+    "category": "Road",
+    "priceGbp": 3200,
+    "weightKg": 7.1,
+    "bestFor": "So light, it is life changing. Next thing you know you are spending 100 pounds a month on bike gears.",
+    "spec": "7.1 kg · Carbon · 22-speed",
+    "description": "So light, it is life changing. Next thing you know you are spending 100 pounds a month on bike gears.",
+    "image": "/bikes/road-bike.png",
+    "highlights": [
+      "Carbon frame and fork for climbing and long days in the saddle",
+      "Shimano 105 groupset — reliable shifting without the pro-team price tag",
+      "32 mm tyre clearance for UK chip-seal and the occasional cobble"
+    ]
+  },
+  {
+    "modelId": "summit-tr",
+    "name": "Summit TR",
+    "category": "Mountain",
+    "priceGbp": 4100,
+    "weightKg": 13.4,
+    "bestFor": "Full suspension for when the trail gets spicy and your confidence gets mild.",
+    "spec": "13.4 kg · 150mm travel · 12-speed",
+    "description": "Full suspension for when the trail gets spicy and your confidence gets mild.",
+    "image": "/bikes/mountain-bike.png",
+    "highlights": [
+      "150 mm front and rear travel for proper trail days",
+      "12-speed drivetrain with a wide-range cassette for steep climbs",
+      "Dropper-post ready — add one when the descents get serious"
+    ]
+  },
+  {
+    "modelId": "district-cb",
+    "name": "District CB",
+    "category": "City",
+    "priceGbp": 1450,
+    "weightKg": 11.0,
+    "bestFor": "The sensible choice, fits its in a flat share hallway.",
+    "spec": "11.0 kg · Belt drive · 8-speed",
+    "description": "The sensible choice, fits its in a flat share hallway.",
+    "image": "/bikes/city-bike.png",
+    "highlights": [
+      "Gates Carbon belt drive — quiet, clean, almost no maintenance",
+      "Upright geometry for traffic visibility and all-day comfort",
+      "Mudguard and rack mounts for year-round commuting"
+    ]
+  },
+  {
+    "modelId": "volt-ev",
+    "name": "Volt EV",
+    "category": "Electric",
+    "priceGbp": 3850,
+    "weightKg": 19.5,
+    "bestFor": "Feeling a bit lazy? Arrive at the office looking fresh. Battery good for longer than your smartphone.",
+    "spec": "19.5 kg · 90 km range · 250W motor",
+    "description": "Feeling a bit lazy? Arrive at the office looking fresh. Battery good for longer than your smartphone.",
+    "image": "/bikes/electric-bike.png",
+    "highlights": [
+      "250 W motor with smooth pedal assist up to 25 km/h (UK legal limit)",
+      "Up to 90 km range on a single charge — enough for a week of commuting",
+      "Integrated lights and lock mount for daily city use"
+    ]
+  }
+]

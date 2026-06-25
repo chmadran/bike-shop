@@ -5,6 +5,7 @@ import type { ChatMessage } from '@/lib/chat-types'
 import {
   buildRecommendedBikeAttachment,
   focusModelFromStockInput,
+  focusModelFromStockResult,
   inferFocusModelFromText,
   mergeAttachments,
   parseCatalogOutput,
@@ -320,7 +321,7 @@ function useEveChat() {
 
               if (toolName === 'check_bike_stock') {
                 const pending = result.callId ? pendingCalls.get(result.callId) : undefined
-                const model = focusModelFromStockInput(pending?.input)
+                const model = focusModelFromStockResult(pending?.input, result.output)
                 if (model) focusModel = model
               } else if (toolName === 'get_catalog') {
                 turnCatalog = parseCatalogOutput(result.output) ?? turnCatalog

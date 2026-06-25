@@ -1,4 +1,3 @@
-import { bikes } from '@/lib/bikes'
 import type { CatalogModel, MessageAttachment } from '@/lib/chat-types'
 
 type ActionResultPayload = {
@@ -29,7 +28,15 @@ function parseCatalogModel(value: unknown): CatalogModel | null {
 
   const priceGbp = toNumber(row.priceGbp)
   const weightKg = toNumber(row.weightKg)
+  const modelId =
+    typeof row.modelId === 'string'
+      ? row.modelId
+      : typeof row.model_id === 'string'
+        ? row.model_id
+        : null
+
   if (
+    !modelId ||
     typeof row.name !== 'string' ||
     typeof row.category !== 'string' ||
     typeof row.bestFor !== 'string' ||
@@ -40,6 +47,7 @@ function parseCatalogModel(value: unknown): CatalogModel | null {
   }
 
   return {
+    modelId,
     name: row.name,
     category: row.category,
     priceGbp,
@@ -65,24 +73,14 @@ export function parseCatalogOutput(output: unknown): CatalogModel[] | null {
   return parsed.length > 0 ? parsed : null
 }
 
-export function catalogModelFromLocalBike(modelName: string): CatalogModel | null {
-  const bike = bikes.find((item) => item.name.toLowerCase() === modelName.toLowerCase())
-  if (!bike) return null
-
-  const weightMatch = bike.spec.match(/^([\d.]+)\s*kg/)
-  const weightKg = weightMatch ? Number(weightMatch[1]) : 0
-
-  return {
-    name: bike.name,
-    category: bike.category,
-    priceGbp: bike.price,
-    weightKg,
-    bestFor: bike.description,
-    spec: bike.spec,
-  }
+function modelMatchesFocus(model: CatalogModel, focus: string): boolean {
+  const needle = focus.toLowerCase()
+  return (
+    model.modelId.toLowerCase() === needle || model.name.toLowerCase() === needle
+  )
 }
 
-/** Match a bike name mentioned in the assistant reply (fallback when stock wasn't checked). */
+/** Match a bike mentioned in the assistant reply (fallback when stock wasn't checked). */
 export function inferFocusModelFromText(
   text: string,
   catalog: CatalogModel[] | null,
@@ -90,29 +88,49 @@ export function inferFocusModelFromText(
   if (!catalog?.length || !text.trim()) return null
 
   const haystack = text.toLowerCase()
-  const matches = catalog.filter((model) => haystack.includes(model.name.toLowerCase()))
-  return matches.length === 1 ? matches[0].name : null
+  const matches = catalog.filter(
+    (model) =>
+      haystack.includes(model.name.toLowerCase()) ||
+      haystack.includes(model.modelId.toLowerCase()),
+  )
+
+  if (matches.length === 1) return matches[0].modelId
+  if (matches.length > 1) {
+    const byName = matches.filter((model) => haystack.includes(model.name.toLowerCase()))
+    if (byName.length === 1) return byName[0].modelId
+  }
+
+  return null
 }
 
 /** One card for the recommended model only — never the full catalog grid. */
 export function buildRecommendedBikeAttachment(
   catalog: CatalogModel[] | null,
-  focusModel: string | null,
+  focusModelId: string | null,
 ): MessageAttachment | null {
-  if (!focusModel) return null
+  if (!focusModelId || !catalog?.length) return null
 
-  const fromCatalog = catalog?.find(
-    (model) => model.name.toLowerCase() === focusModel.toLowerCase(),
-  )
-  if (fromCatalog) return { type: 'catalog', models: [fromCatalog] }
-
-  const local = catalogModelFromLocalBike(focusModel)
-  return local ? { type: 'catalog', models: [local] } : null
+  const match = catalog.find((model) => modelMatchesFocus(model, focusModelId))
+  return match ? { type: 'catalog', models: [match] } : null
 }
 
 export function focusModelFromStockInput(input: unknown): string | null {
-  const modelName = (input as { modelName?: string } | undefined)?.modelName
-  return typeof modelName === 'string' && modelName.trim() ? modelName.trim() : null
+  const row = input as { modelId?: string; modelName?: string } | undefined
+  if (typeof row?.modelId === 'string' && row.modelId.trim()) {
+    return row.modelId.trim()
+  }
+  if (typeof row?.modelName === 'string' && row.modelName.trim()) {
+    return row.modelName.trim()
+  }
+  return null
+}
+
+export function focusModelFromStockResult(input: unknown, output: unknown): string | null {
+  const result = output as { modelId?: string } | undefined
+  if (typeof result?.modelId === 'string' && result.modelId.trim()) {
+    return result.modelId.trim()
+  }
+  return focusModelFromStockInput(input)
 }
 
 export function mergeAttachments(

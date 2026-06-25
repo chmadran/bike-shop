@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { AddToBasketButton } from '@/components/add-to-basket-button'
-import type { Bike } from '@/lib/bikes'
+import type { Bike } from '@/lib/bike-types'
 import { priceFormatter } from '@/lib/content'
 
 export function BikeDetailPanel({ bike }: { bike: Bike }) {
@@ -23,9 +23,11 @@ export function BikeDetailPanel({ bike }: { bike: Bike }) {
             <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
               {bike.category}
             </p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{bike.name}</h2>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              {bike.name}
+            </h2>
           </div>
-          <p className="text-xl font-medium">{priceFormatter.format(bike.price)}</p>
+          <p className="text-xl font-medium">{priceFormatter.format(bike.priceGbp)}</p>
         </div>
 
         <p className="text-pretty text-base leading-relaxed text-muted-foreground">
@@ -48,7 +50,7 @@ export function BikeDetailPanel({ bike }: { bike: Bike }) {
           </ul>
         </div>
 
-        <AddToBasketButton bikeId={bike.id} className="w-full sm:w-auto" />
+        <AddToBasketButton bikeId={bike.modelId} className="w-full sm:w-auto" />
 
         <p className="border-t border-border pt-4 text-xs text-muted-foreground">
           VAT included · Free 30-day returns · Lifetime frame warranty

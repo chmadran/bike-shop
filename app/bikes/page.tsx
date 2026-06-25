@@ -5,16 +5,18 @@ import { SiteFooter } from '@/components/site-footer'
 import { FaqBotLauncher } from '@/components/faq-bot-launcher'
 import { BikeCard } from '@/components/bike-card'
 import { BikeDetailPanel } from '@/components/bike-detail-panel'
-import { bikes, findBikeById } from '@/lib/bikes'
+import { getCachedBike, getCachedBikeCatalog } from '@/lib/bikes-catalog'
 import { site } from '@/lib/content'
+
+export const dynamic = 'force-dynamic'
 
 type PageProps = {
   searchParams: Promise<{ bike?: string }>
 }
 
 export async function generateMetadata({ searchParams }: PageProps) {
-  const { bike: bikeId } = await searchParams
-  const bike = bikeId ? findBikeById(bikeId) : undefined
+  const { bike: modelId } = await searchParams
+  const bike = modelId ? await getCachedBike(modelId) : undefined
 
   if (bike) {
     return {
@@ -30,11 +32,11 @@ export async function generateMetadata({ searchParams }: PageProps) {
 }
 
 export default async function BikesPage({ searchParams }: PageProps) {
-  const { bike: bikeId } = await searchParams
+  const { bike: modelId } = await searchParams
   const { bikeGrid } = site
 
-  if (bikeId) {
-    const bike = findBikeById(bikeId)
+  if (modelId) {
+    const bike = await getCachedBike(modelId)
     if (!bike) notFound()
 
     return (
@@ -57,6 +59,8 @@ export default async function BikesPage({ searchParams }: PageProps) {
     )
   }
 
+  const bikes = await getCachedBikeCatalog()
+
   return (
     <main className="min-h-dvh bg-background">
       <SiteHeader />
@@ -75,7 +79,7 @@ export default async function BikesPage({ searchParams }: PageProps) {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {bikes.map((bike, i) => (
-            <BikeCard key={bike.id} bike={bike} priority={i === 0} />
+            <BikeCard key={bike.modelId} bike={bike} priority={i === 0} />
           ))}
         </div>
       </div>

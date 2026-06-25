@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 import { z } from 'zod'
-import { findBikeById } from '@/lib/bikes'
+import { getCachedBike } from '@/lib/bikes-catalog'
 import { getSiteUrl } from '@/lib/site-url'
 
 const checkoutSchema = z.object({
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = []
 
     for (const item of body.items) {
-      const bike = findBikeById(item.bikeId)
+      const bike = await getCachedBike(item.bikeId)
       if (!bike) {
         return Response.json({ error: `Unknown bike: ${item.bikeId}` }, { status: 400 })
       }
@@ -40,11 +40,11 @@ export async function POST(request: Request) {
         quantity: item.quantity,
         price_data: {
           currency: 'gbp',
-          unit_amount: Math.round(bike.price * 100),
+          unit_amount: Math.round(bike.priceGbp * 100),
           product_data: {
             name: bike.name,
             description: bike.spec,
-            metadata: { bikeId: bike.id },
+            metadata: { bikeId: bike.modelId },
           },
         },
       })

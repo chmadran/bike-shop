@@ -5,6 +5,8 @@ import { Features } from '@/components/features'
 import { SiteFooter } from '@/components/site-footer'
 import { FaqBotLauncher } from '@/components/faq-bot-launcher'
 
+export const dynamic = 'force-dynamic'
+
 export default function Page() {
   return (
     <main className="min-h-dvh bg-background">

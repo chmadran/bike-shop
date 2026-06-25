@@ -1,8 +1,9 @@
-import { bikes } from '@/lib/bikes'
+import { getCachedBikeCatalog } from '@/lib/bikes-catalog'
 import { site } from '@/lib/content'
 import { BikeCard } from '@/components/bike-card'
 
-export function BikeGrid() {
+export async function BikeGrid() {
+  const bikes = await getCachedBikeCatalog()
   const { bikeGrid } = site
 
   return (
@@ -24,7 +25,7 @@ export function BikeGrid() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {bikes.map((bike, i) => (
-            <BikeCard key={bike.id} bike={bike} priority={i === 0} />
+            <BikeCard key={bike.modelId} bike={bike} priority={i === 0} />
           ))}
         </div>
       </div>

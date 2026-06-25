@@ -48,7 +48,7 @@ Open [http://localhost:3000](http://localhost:3000) and use the chat widget (bot
 |---------|-------------|
 | `pnpm dev` | Start Next.js + Eve agent |
 | `pnpm build` | Production build |
-| `pnpm seed` | Seed stock + FAQ vectors (from `lib/bikes.ts` + FAQ corpus) |
+| `pnpm seed` | Seed stock + FAQ vectors (from `data/bike-catalog.json` + FAQ corpus) |
 | `pnpm seed:stock` / `pnpm seed:faq` | Seed one table only |
 | `pnpm eval` | Automated RAG + catalog price regression |
 
@@ -57,7 +57,7 @@ Schema: [`scripts/schema.sql`](scripts/schema.sql)
 ### Evaluation approach
 
 1. **Automated RAG regression** — 6 golden queries against `search_faq` retrieval
-2. **Automated catalog price check** — `bike_stock` prices match `lib/bikes.ts`; flags common wrong prices
+2. **Automated catalog price check** — `bike_stock` prices match `data/bike-catalog.json`; flags common wrong prices
 3. **Manual agent rubric** — routing, scope, injection cases printed at end of `pnpm eval`
 
 Golden set: [`eval/golden-set.json`](eval/golden-set.json)
@@ -84,14 +84,29 @@ Golden set: [`eval/golden-set.json`](eval/golden-set.json)
 
 ## Rendering & performance
 
-- **Homepage:** Server Components, static at build
+- **Homepage:** Server Components; bike grid loaded from Neon via `unstable_cache` (tag `bikes`)
 - **Chat:** Client component for Eve streaming
 - **Images:** Next.js Image Optimization (WebP/AVIF on Vercel)
 - **Rate limiting:** 10 req/min/IP on `/eve/v1/session*` in [`proxy.ts`](proxy.ts) — production → Vercel KV
 
+### Catalog ISR (demo)
+
+Bike pages read from Neon through [`lib/bikes-catalog.ts`](lib/bikes-catalog.ts) with cache tags `bikes` and `bike:{modelId}`.
+
+After updating stock in Neon (or running `pnpm seed:stock`):
+
+```bash
+curl -X POST "http://localhost:3000/api/revalidate?tag=bikes" \
+  -H "x-revalidate-secret: $REVALIDATE_SECRET"
+```
+
+`pnpm seed:stock` calls this automatically when `REVALIDATE_SECRET` is set and the dev server is running.
+
+Existing Neon databases: run [`scripts/migrate-catalog.sql`](scripts/migrate-catalog.sql) once, then `pnpm seed:stock`.
+
 ## Known limitations
 
-- English-only UK shop (copy in `lib/content.ts`, catalog in `lib/bikes.ts`)
+- English-only UK shop (copy in `lib/content.ts`, catalog seed in `data/bike-catalog.json`)
 - No Vercel Workflows for business flows yet
 - In-process rate limit (not durable across serverless instances)
 

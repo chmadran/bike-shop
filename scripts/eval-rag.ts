@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { embed, gateway } from "ai";
-import { bikes } from "../lib/bikes";
+import type { Bike } from "../lib/bike-types";
 import { loadLocalEnv } from "./load-env";
 
 loadLocalEnv();
@@ -44,6 +44,11 @@ type GoldenSet = {
   version: number;
   cases: Array<RagCase | RoutingCase>;
 };
+
+function loadCatalogSeed(): Bike[] {
+  const path = join(process.cwd(), "data/bike-catalog.json");
+  return JSON.parse(readFileSync(path, "utf8")) as Bike[];
+}
 
 async function searchFaq(query: string, limit = 3): Promise<FaqRow[]> {
   const sql = neon(process.env.DATABASE_URL!);
@@ -105,6 +110,7 @@ async function runRagCase(testCase: RagCase): Promise<{ pass: boolean; detail: s
 }
 
 type CatalogRow = {
+  model_id: string;
   model_name: string;
   price_gbp: number;
 };
@@ -115,11 +121,11 @@ const HALLUCINATED_PRICES = [999, 1500, 1999, 2500, 2999, 3500, 5000];
 async function fetchCatalog(): Promise<CatalogRow[]> {
   const sql = neon(process.env.DATABASE_URL!);
   return (await sql`
-    SELECT DISTINCT ON (model_name)
-      model_name, price_gbp
+    SELECT DISTINCT ON (model_id)
+      model_id, model_name, price_gbp
     FROM bike_stock
     WHERE price_gbp IS NOT NULL
-    ORDER BY model_name, price_gbp ASC
+    ORDER BY model_id, updated_at DESC
   `) as CatalogRow[];
 }
 
@@ -130,22 +136,23 @@ async function runCatalogPriceEval(): Promise<{ passed: number; total: number }>
     return { passed: 0, total: 1 };
   }
 
+  const seed = loadCatalogSeed();
   let passed = 0;
-  const total = bikes.length + 1; // one row per canonical model + hallucination trap
+  const total = seed.length + 1;
 
-  for (const bike of bikes) {
-    const row = rows.find((r) => r.model_name === bike.name);
+  for (const bike of seed) {
+    const row = rows.find((r) => r.model_id === bike.modelId);
     if (!row) {
       console.log(`  ✗ ${bike.name.padEnd(28)} missing from bike_stock`);
       continue;
     }
-    if (row.price_gbp !== bike.price) {
+    if (row.price_gbp !== bike.priceGbp) {
       console.log(
-        `  ✗ ${bike.name.padEnd(28)} DB £${row.price_gbp} ≠ canonical £${bike.price}`,
+        `  ✗ ${bike.name.padEnd(28)} DB £${row.price_gbp} ≠ seed £${bike.priceGbp}`,
       );
       continue;
     }
-    console.log(`  ✓ ${bike.name.padEnd(28)} £${row.price_gbp} matches lib/bikes.ts`);
+    console.log(`  ✓ ${bike.name.padEnd(28)} £${row.price_gbp} matches data/bike-catalog.json`);
     passed++;
   }
 

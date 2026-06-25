@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Bike } from '@/lib/bikes'
+import type { Bike } from '@/lib/bike-types'
+import { bikeDetailPath } from '@/lib/bike-paths'
 import { priceFormatter } from '@/lib/content'
 
 type BikeCardProps = {
@@ -11,7 +12,7 @@ type BikeCardProps = {
 export function BikeCard({ bike, priority }: BikeCardProps) {
   return (
     <Link
-      href={`/bikes?bike=${bike.id}`}
+      href={bikeDetailPath(bike.modelId)}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
     >
       <div className="overflow-hidden border-b border-border bg-bike-surface">
@@ -30,7 +31,7 @@ export function BikeCard({ bike, priority }: BikeCardProps) {
             {bike.category}
           </span>
           <span className="text-sm font-medium">
-            {priceFormatter.format(bike.price)}
+            {priceFormatter.format(bike.priceGbp)}
           </span>
         </div>
         <h3 className="text-lg font-semibold tracking-tight">{bike.name}</h3>

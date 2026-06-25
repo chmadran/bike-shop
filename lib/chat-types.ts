@@ -1,4 +1,5 @@
 export type CatalogModel = {
+  modelId: string
   name: string
   category: string
   priceGbp: number
