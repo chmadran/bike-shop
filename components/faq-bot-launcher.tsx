@@ -50,6 +50,7 @@ const MAX_SESSIONS = 20
 const MAX_MESSAGE_LENGTH = 2_000
 const CHAT_ERROR_MESSAGE =
   "Sorry — I couldn't get a reply. This can happen after a dev server restart. Try again, or tap **New chat** in History."
+const FIRST_CHAT_PLACEHOLDER = 'Can you help me find my new bike ?'
 
 function normalizeMessage(raw: FormDataEntryValue | null): string {
   return String(raw ?? '').trim().slice(0, MAX_MESSAGE_LENGTH)
@@ -795,7 +796,7 @@ export function FaqBotLauncher() {
               <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-border px-3 py-2">
                 <input
                   name="message"
-                  placeholder="e.g. Will this bike make me faster, or just louder on group rides?"
+                  placeholder={messages.length === 0 ? FIRST_CHAT_PLACEHOLDER : ''}
                   disabled={isBusy}
                   autoComplete="off"
                   maxLength={MAX_MESSAGE_LENGTH}
