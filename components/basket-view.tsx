@@ -59,7 +59,7 @@ export function BasketView({ catalog }: BasketViewProps) {
             <ul className="divide-y divide-border rounded-xl border border-border">
               {rows.map(({ bike, quantity }) => (
                 <li key={bike.modelId} className="flex gap-4 p-4">
-                  <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-muted">
+                  <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-bike-surface">
                     <Image
                       src={bike.image}
                       alt={bike.name}

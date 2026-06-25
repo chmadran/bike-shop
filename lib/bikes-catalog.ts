@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { neon } from '@neondatabase/serverless'
+import { loadBikeCatalogSeed } from '@/lib/bike-assets'
 import type { Bike } from '@/lib/bike-types'
 
 const CATALOG_TAG = 'bikes'
@@ -12,144 +13,58 @@ type StockCatalogRow = {
   weight_kg: number | null
   best_for: string | null
   spec: string | null
-  image: string | null
-  description: string | null
-  highlights: string[] | null
 }
 
 type SqlClient = (strings: TemplateStringsArray, ...values: unknown[]) => Promise<unknown>
 
-function rowToBike(row: StockCatalogRow): Bike {
+function rowToBike(row: StockCatalogRow, seed: Map<string, Bike>): Bike {
+  const fallback = seed.get(row.model_id)
+
   return {
     modelId: row.model_id,
     name: row.model_name,
     category: row.category,
     priceGbp: row.price_gbp,
-    weightKg: row.weight_kg !== null ? Number(row.weight_kg) : null,
-    bestFor: row.best_for ?? '',
-    spec: row.spec ?? '',
-    description: row.description ?? row.best_for ?? '',
-    image: row.image ?? '',
-    highlights: Array.isArray(row.highlights) ? row.highlights : [],
+    weightKg: row.weight_kg !== null ? Number(row.weight_kg) : fallback?.weightKg ?? null,
+    bestFor: row.best_for ?? fallback?.bestFor ?? '',
+    spec: row.spec ?? fallback?.spec ?? '',
+    description: fallback?.description ?? row.best_for ?? '',
+    image: fallback?.image ?? '',
+    highlights: fallback?.highlights ?? [],
   }
-}
-
-function isMissingDisplayColumnError(err: unknown): boolean {
-  const message = err instanceof Error ? err.message : String(err)
-  return message.includes('column "image" does not exist')
 }
 
 async function fetchCatalogRows(sql: SqlClient): Promise<StockCatalogRow[]> {
-  try {
-    return (await sql`
-      SELECT DISTINCT ON (model_id)
-        model_id,
-        model_name,
-        category,
-        price_gbp,
-        weight_kg,
-        best_for,
-        spec,
-        image,
-        description,
-        highlights
-      FROM bike_stock
-      WHERE model_id IS NOT NULL AND price_gbp IS NOT NULL
-      ORDER BY model_id, warehouse
-    `) as StockCatalogRow[]
-  } catch (err) {
-    if (!isMissingDisplayColumnError(err)) throw err
-
-    const rows = (await sql`
-      SELECT DISTINCT ON (model_id)
-        model_id,
-        model_name,
-        category,
-        price_gbp,
-        weight_kg,
-        best_for,
-        spec
-      FROM bike_stock
-      WHERE model_id IS NOT NULL AND price_gbp IS NOT NULL
-      ORDER BY model_id, warehouse
-    `) as Omit<StockCatalogRow, 'image' | 'description' | 'highlights'>[]
-
-    return rows.map((row) => ({
-      ...row,
-      image: null,
-      description: null,
-      highlights: null,
-    }))
-  }
-}
-
-async function fetchBikeRow(sql: SqlClient, modelId: string): Promise<StockCatalogRow | null> {
-  try {
-    const rows = (await sql`
-      SELECT
-        model_id,
-        model_name,
-        category,
-        price_gbp,
-        weight_kg,
-        best_for,
-        spec,
-        image,
-        description,
-        highlights
-      FROM bike_stock
-      WHERE model_id = ${modelId}
-      ORDER BY warehouse
-      LIMIT 1
-    `) as StockCatalogRow[]
-
-    return rows[0] ?? null
-  } catch (err) {
-    if (!isMissingDisplayColumnError(err)) throw err
-
-    const rows = (await sql`
-      SELECT
-        model_id,
-        model_name,
-        category,
-        price_gbp,
-        weight_kg,
-        best_for,
-        spec
-      FROM bike_stock
-      WHERE model_id = ${modelId}
-      ORDER BY warehouse
-      LIMIT 1
-    `) as Omit<StockCatalogRow, 'image' | 'description' | 'highlights'>[]
-
-    if (!rows[0]) return null
-    return { ...rows[0], image: null, description: null, highlights: null }
-  }
+  return (await sql`
+    SELECT DISTINCT ON (model_id)
+      model_id,
+      model_name,
+      category,
+      price_gbp,
+      weight_kg,
+      best_for,
+      spec
+    FROM bike_stock
+    WHERE model_id IS NOT NULL AND price_gbp IS NOT NULL
+    ORDER BY model_id, updated_at DESC, warehouse
+  `) as StockCatalogRow[]
 }
 
 async function fetchBikeCatalogFromDb(): Promise<Bike[]> {
   const sql = neon(process.env.DATABASE_URL!)
+  const seed = loadBikeCatalogSeed()
   const rows = await fetchCatalogRows(sql)
-  return rows.map(rowToBike)
+  return rows.map((row) => rowToBike(row, seed))
 }
 
 export const getCachedBikeCatalog = unstable_cache(
   fetchBikeCatalogFromDb,
-  ['bike-catalog'],
+  ['bike-catalog-v2'],
   { tags: [CATALOG_TAG] },
 )
 
+/** Always derived from the catalog cache so list/detail/basket show the same image. */
 export async function getCachedBike(modelId: string): Promise<Bike | undefined> {
-  const getOne = unstable_cache(
-    async () => {
-      const sql = neon(process.env.DATABASE_URL!)
-      const row = await fetchBikeRow(sql, modelId)
-      return row ? rowToBike(row) : null
-    },
-    ['bike', modelId],
-    { tags: [CATALOG_TAG, `bike:${modelId}`] },
-  )
-
-  const result = await getOne()
-  return result ?? undefined
+  const catalog = await getCachedBikeCatalog()
+  return catalog.find((bike) => bike.modelId === modelId)
 }

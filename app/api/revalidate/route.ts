@@ -13,5 +13,10 @@ export async function POST(request: NextRequest) {
   const tag = request.nextUrl.searchParams.get('tag') ?? 'bikes'
   revalidateTag(tag, 'max')
 
+  // Per-bike tags must also bust the shared catalog cache used by the grid.
+  if (tag.startsWith('bike:') && tag !== 'bikes') {
+    revalidateTag('bikes', 'max')
+  }
+
   return Response.json({ revalidated: true, tag })
 }
