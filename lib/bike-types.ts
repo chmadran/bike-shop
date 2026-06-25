@@ -10,6 +10,3 @@ export type Bike = {
   image: string
   highlights: string[]
 }
-
-/** @deprecated Use Bike */
-export type BikeModel = Bike

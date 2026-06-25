@@ -5,8 +5,7 @@ export default defineAgent({
   modelOptions: {
     providerOptions: {
       gateway: {
-        models: ["openai/gpt-4o", "anthropic/claude-sonnet-4"],
-        order: ["azure", "openai"],
+        models: ["openai/gpt-4o", "anthropic/claude-sonnet-4"]
       },
     },
   },

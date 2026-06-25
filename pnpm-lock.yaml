@@ -71,12 +71,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
-      just-bash:
-        specifier: ^3.0.2
-        version: 3.0.2
-      microsandbox:
-        specifier: ^0.5.7
-        version: 0.5.7
       postcss:
         specifier: ^8.5
         version: 8.5.6
@@ -3358,7 +3352,8 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@borewit/text-codec@0.2.2': {}
+  '@borewit/text-codec@0.2.2':
+    optional: true
 
   '@dotenvx/dotenvx@1.70.0':
     dependencies:
@@ -3605,23 +3600,28 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.10.4
 
-  '@jitl/quickjs-ffi-types@0.32.0': {}
+  '@jitl/quickjs-ffi-types@0.32.0':
+    optional: true
 
   '@jitl/quickjs-wasmfile-debug-asyncify@0.32.0':
     dependencies:
       '@jitl/quickjs-ffi-types': 0.32.0
+    optional: true
 
   '@jitl/quickjs-wasmfile-debug-sync@0.32.0':
     dependencies:
       '@jitl/quickjs-ffi-types': 0.32.0
+    optional: true
 
   '@jitl/quickjs-wasmfile-release-asyncify@0.32.0':
     dependencies:
       '@jitl/quickjs-ffi-types': 0.32.0
+    optional: true
 
   '@jitl/quickjs-wasmfile-release-sync@0.32.0':
     dependencies:
       '@jitl/quickjs-ffi-types': 0.32.0
+    optional: true
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -3642,7 +3642,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mixmark-io/domino@2.2.0': {}
+  '@mixmark-io/domino@2.2.0':
+    optional: true
 
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
@@ -3724,7 +3725,8 @@ snapshots:
 
   '@noble/hashes@1.8.0': {}
 
-  '@nodable/entities@2.2.0': {}
+  '@nodable/entities@2.2.0':
+    optional: true
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -3899,8 +3901,10 @@ snapshots:
       token-types: 6.1.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
-  '@tokenizer/token@0.3.0': {}
+  '@tokenizer/token@0.3.0':
+    optional: true
 
   '@ts-morph/common@0.27.0':
     dependencies:
@@ -4003,7 +4007,8 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
-  anynum@1.0.1: {}
+  anynum@1.0.1:
+    optional: true
 
   argparse@2.0.1: {}
 
@@ -4128,7 +4133,8 @@ snapshots:
 
   commander@14.0.3: {}
 
-  commander@6.2.1: {}
+  commander@6.2.1:
+    optional: true
 
   consola@3.4.2: {}
 
@@ -4474,6 +4480,7 @@ snapshots:
     dependencies:
       path-expression-matcher: 1.6.1
       xml-naming: 0.1.0
+    optional: true
 
   fast-xml-parser@5.9.3:
     dependencies:
@@ -4483,6 +4490,7 @@ snapshots:
       path-expression-matcher: 1.6.1
       strnum: 2.4.1
       xml-naming: 0.1.0
+    optional: true
 
   fastq@1.20.1:
     dependencies:
@@ -4509,6 +4517,7 @@ snapshots:
       uint8array-extras: 1.5.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   fill-range@7.1.1:
     dependencies:
@@ -4668,7 +4677,8 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  ieee754@1.2.1: {}
+  ieee754@1.2.1:
+    optional: true
 
   ignore@5.3.2: {}
 
@@ -4682,7 +4692,8 @@ snapshots:
   ini@1.3.8:
     optional: true
 
-  ini@6.0.0: {}
+  ini@6.0.0:
+    optional: true
 
   inline-style-parser@0.2.7: {}
 
@@ -4741,7 +4752,8 @@ snapshots:
 
   is-unicode-supported@2.1.0: {}
 
-  is-unsafe@1.0.1: {}
+  is-unsafe@1.0.1:
+    optional: true
 
   is-wsl@3.1.1:
     dependencies:
@@ -4801,6 +4813,7 @@ snapshots:
       node-liblzma: 2.2.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   kleur@3.0.3: {}
 
@@ -5242,6 +5255,7 @@ snapshots:
       '@superradcompany/microsandbox-darwin-arm64': 0.5.7
       '@superradcompany/microsandbox-linux-arm64-gnu': 0.5.7
       '@superradcompany/microsandbox-linux-x64-gnu': 0.5.7
+    optional: true
 
   mime-db@1.54.0: {}
 
@@ -5265,7 +5279,8 @@ snapshots:
   mkdirp-classic@0.5.3:
     optional: true
 
-  modern-tar@0.7.6: {}
+  modern-tar@0.7.6:
+    optional: true
 
   ms@2.1.3: {}
 
@@ -5469,7 +5484,8 @@ snapshots:
 
   outvariant@1.4.3: {}
 
-  papaparse@5.5.4: {}
+  papaparse@5.5.4:
+    optional: true
 
   parent-module@1.0.1:
     dependencies:
@@ -5498,7 +5514,8 @@ snapshots:
 
   path-browserify@1.0.1: {}
 
-  path-expression-matcher@1.6.1: {}
+  path-expression-matcher@1.6.1:
+    optional: true
 
   path-key@3.1.1: {}
 
@@ -5584,6 +5601,7 @@ snapshots:
   quickjs-emscripten-core@0.32.0:
     dependencies:
       '@jitl/quickjs-ffi-types': 0.32.0
+    optional: true
 
   quickjs-emscripten@0.32.0:
     dependencies:
@@ -5592,6 +5610,7 @@ snapshots:
       '@jitl/quickjs-wasmfile-release-asyncify': 0.32.0
       '@jitl/quickjs-wasmfile-release-sync': 0.32.0
       quickjs-emscripten-core: 0.32.0
+    optional: true
 
   range-parser@1.2.1: {}
 
@@ -5610,7 +5629,8 @@ snapshots:
       strip-json-comments: 2.0.1
     optional: true
 
-  re2js@1.3.3: {}
+  re2js@1.3.3:
+    optional: true
 
   react-dom@19.2.4(react@19.2.4):
     dependencies:
@@ -5750,6 +5770,7 @@ snapshots:
   seek-bzip@2.0.0:
     dependencies:
       commander: 6.2.1
+    optional: true
 
   semver@6.3.1: {}
 
@@ -5910,7 +5931,8 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  smol-toml@1.7.0: {}
+  smol-toml@1.7.0:
+    optional: true
 
   source-map-js@1.2.1: {}
 
@@ -5918,9 +5940,11 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  sprintf-js@1.1.3: {}
+  sprintf-js@1.1.3:
+    optional: true
 
-  sql.js@1.14.1: {}
+  sql.js@1.14.1:
+    optional: true
 
   srvx@0.11.17: {}
 
@@ -5982,10 +6006,12 @@ snapshots:
   strnum@2.4.1:
     dependencies:
       anynum: 1.0.1
+    optional: true
 
   strtok3@10.3.5:
     dependencies:
       '@tokenizer/token': 0.3.0
+    optional: true
 
   style-to-js@1.1.21:
     dependencies:
@@ -6046,6 +6072,7 @@ snapshots:
       '@borewit/text-codec': 0.2.2
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
+    optional: true
 
   tough-cookie@6.0.1:
     dependencies:
@@ -6082,6 +6109,7 @@ snapshots:
   turndown@7.2.4:
     dependencies:
       '@mixmark-io/domino': 2.2.0
+    optional: true
 
   tw-animate-css@1.4.0: {}
 
@@ -6097,7 +6125,8 @@ snapshots:
 
   typescript@5.7.3: {}
 
-  uint8array-extras@1.5.0: {}
+  uint8array-extras@1.5.0:
+    optional: true
 
   undici-types@7.16.0: {}
 
@@ -6196,13 +6225,15 @@ snapshots:
       is-wsl: 3.1.1
       powershell-utils: 0.1.0
 
-  xml-naming@0.1.0: {}
+  xml-naming@0.1.0:
+    optional: true
 
   y18n@5.0.8: {}
 
   yallist@3.1.1: {}
 
-  yaml@2.9.0: {}
+  yaml@2.9.0:
+    optional: true
 
   yargs-parser@21.1.1: {}
 

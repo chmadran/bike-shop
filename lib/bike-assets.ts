@@ -12,7 +12,3 @@ export function loadBikeCatalogSeed(): Map<string, Bike> {
   seedCache = new Map(seed.map((bike) => [bike.modelId, bike]))
   return seedCache
 }
-
-export function seedImageForModel(modelId: string): string {
-  return loadBikeCatalogSeed().get(modelId)?.image ?? ''
-}
