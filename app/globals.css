@@ -79,7 +79,7 @@
   --radius: 0.5rem;
   --geist-blue: #0070f3;
   --geist-cyan: #79ffe1;
-  --bike-surface: oklch(0.918 0.012 80);
+  --bike-surface: #e6decf;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
