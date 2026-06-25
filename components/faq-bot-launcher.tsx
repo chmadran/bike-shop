@@ -700,7 +700,8 @@ export function FaqBotLauncher() {
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {open && (
-        <div className="flex h-[calc(100dvh-6rem)] max-h-[56rem] w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:w-[480px]">
+        //size of my bot!!
+        <div className="flex h-[calc(70dvh-6rem)] max-h-[56rem] w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:w-[680px]">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
