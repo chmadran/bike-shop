@@ -1,94 +1,86 @@
-# Vur Selle Bikes
+# Vur Selle Bikes — RAG support assistant (AI Cloud)
 
-A UK bike-shop demo built for a Vercel Solutions Architect review: a **Next.js marketing site** (Frontend Cloud) plus an **Eve-powered FAQ and purchase advisor** (AI Cloud), with live inventory from Neon, tag-based catalog caching, and Stripe Checkout.
+> **Note:** This repo is a full Solutions Architect demo. I also built **Project 1 (Frontend Cloud)** here — Next.js marketing site, Neon catalog, tag-based caching, basket, and Stripe Checkout. **This README focuses on Project 2: the RAG-based FAQ agent** (Eve, AI SDK, pgvector, evals). The chat widget lives on the same app; browse/checkout code is in the repo but not documented below.
 
-Live demo: https://bike-shop-iota.vercel.app/ 
+Live demo: https://bike-shop-iota.vercel.app/ (FAQ widget, bottom-right)
 
 ---
 
 ## What it does
 
-| Surface | Purpose |
-|---------|---------|
-| **Marketing site** | Server-rendered catalog, bike detail pages, hero and features |
-| **FAQ bot** | RAG over Neon pgvector + live stock/catalog tools |
-| **Basket & checkout** | Client basket (localStorage) + Stripe Checkout (test mode) |
-| **Internals panel** | Per-turn latency, tool/skill trace, token and cost estimates |
+A **RAG-based support assistant** for a UK bike shop: policy answers (shipping, returns, VAT, Cycle to Work, sizing) are **retrieved from Neon pgvector** before the model replies — not invented from training data.
 
-**Outcome:** Policy answers grounded in FAQ data, stock-aware bike recommendations, and a credible commerce flow without inventing prices.
+| Capability | Purpose |
+|------------|---------|
+| **FAQ RAG** | `search_faq` embeds the question (AI SDK + Gateway), vector search on `bike_faq`, model summarises results |
+| **Scoped agent** | UK shop only; off-topic and prompt-injection attempts redirected ([`agent/instructions.md`](agent/instructions.md)) |
+| **Streaming chat** | Client widget → Eve `/eve/v1/session*` → NDJSON stream |
+| **Internals panel** | Per-turn latency, tools/skills trace, rough token cost (demo observability) |
+| **Evals** | Eve evals for safety + price hallucination regression ([`agent/eval/`](agent/eval/)) |
 
----
-
-## Architecture
-
-Three separate paths share one Neon database but do not all go through Eve:
-
-| Path | What happens |
-|------|----------------|
-| **Browse** | RSC pages read the catalog through `lib/bikes-catalog.ts` (tagged `unstable_cache`, on-demand revalidate). |
-| **Chat** | The FAQ widget streams NDJSON from Eve (`/eve/v1/session*`), rate-limited by `proxy.ts`. The agent calls tools that query Neon; the LLM (and FAQ embeddings) go through Vercel AI Gateway. |
-| **Checkout** | Basket lives in `localStorage`; `POST /api/checkout` validates prices from the same catalog cache, then redirects the browser to Stripe Hosted Checkout. |
-
-
-**Agent tools**
-
-| Tool | Data |
-|------|------|
-| `search_faq` | `bike_faq` + pgvector embeddings |
-| `get_catalog` | `bike_stock` (distinct on `model_id`) |
-| `check_bike_stock` | `bike_stock` per warehouse |
-
-**Stack:** Next.js 16 · Eve 0.13.4 · AI SDK + Gateway · Neon · Stripe  
+**Outcome:** Deflect repetitive support questions with answers grounded in your FAQ, on the same Next.js deploy as the storefront.
 
 ---
 
-## Project structure
+## RAG architecture
+
+```text
+Browser (FAQ widget)
+    → Eve agent (withEve, same origin)
+         → LLM: gpt-4o-mini via AI Gateway (+ failover)
+         → faq_guide skill (on policy questions)
+         → search_faq tool
+              → AI SDK embed (text-embedding-3-small, Gateway)
+              → Neon bike_faq + pgvector (cosine similarity)
+         → streamed reply (NDJSON)
+```
+
+| Layer | Role |
+|-------|------|
+| [`agent/instructions.md`](agent/instructions.md) | Always-on scope: search before policy; UK shop only |
+| [`agent/skills/faq_guide.md`](agent/skills/faq_guide.md) | When/how to use `search_faq`; similarity thresholds; answer shape |
+| [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) | Embed query → SQL vector search → top-k FAQ rows |
+| [`agent/channels/eve.ts`](agent/channels/eve.ts) | Public browser chat (`none()`); Gateway auth server-side |
+| [`proxy.ts`](proxy.ts) | Rate limit on `/eve/v1/session*` (demo: in-memory; production: KV) |
+
+The agent also has **purchase** tools (`get_catalog`, `check_bike_stock`) and a `purchase_advisor` skill for bike recommendations — same Eve app, separate from the RAG path documented here.
+
+**Stack (AI Cloud):** Eve 0.13.4 · AI SDK · Vercel AI Gateway · Neon (pgvector) · Next.js 16
+
+---
+
+## Project structure (RAG-relevant)
 
 ```
 bike-shop/
-├── agent/                 # Eve agent
-│   ├── agent.ts           # Model + AI Gateway failover
-│   ├── instructions.md    # Agent personality, always-on system prompt
-│   ├── channels/eve.ts    # Auth (local dev, OIDC, public browser)
-│   ├── eval/              # Eve evals (*.eval.ts)
-│   │   ├── evals.config.ts
-│   │   ├── scope.eval.ts           # off-topic + prompt injection
-│   │   ├── district-cb-price.eval.ts  # price hallucination (£1,450)
-│   │   └── lib/                    # assertions + catalog preflight
-│   ├── skills/            # faq_guide, purchase_advisor
-│   └── tools/             # search_faq, get_catalog, check_bike_stock
-├── evals -> agent/eval     # Symlink — Eve CLI discovers evals/ at app root only
-├── app/                   # Next.js App Router
-│   ├── api/checkout/      # Stripe Checkout session
-│   ├── api/revalidate/    # On-demand ISR (tag `bikes`)
-│   ├── basket/
-│   └── bikes/             # Grid + ?bike={modelId} detail
-├── components/
-│   ├── chat/              # FAQ widget (launcher, stream UI, internals)
-│   ├── basket/            # Cart + checkout button
-│   ├── bike/              # Catalog cards and detail
-│   └── site/              # Header, footer, hero, features
-├── data/
-│   └── bike-catalog.json  # Seed + static image paths
-├── lib/
-│   ├── bikes-catalog.ts   # Neon catalog + unstable_cache
-│   └── bike-assets.ts     # Image paths from JSON
-└── scripts/
-    ├── schema.sql
-    ├── migrate-catalog.sql
-    ├── seed-stock.ts
-    └── seed-faq.ts
+├── agent/
+│   ├── agent.ts              # Model + Gateway failover
+│   ├── instructions.md       # Scope + “search FAQ first”
+│   ├── channels/eve.ts       # Channel auth
+│   ├── skills/faq_guide.md   # RAG playbook
+│   ├── tools/search_faq.ts   # Embeddings + pgvector retrieval
+│   └── eval/                 # Eve evals (*.eval.ts)
+│       ├── evals.config.ts
+│       ├── scope.eval.ts
+│       ├── district-cb-price.eval.ts
+│       └── lib/
+├── evals -> agent/eval       # Symlink — Eve CLI requires evals/ at app root
+├── components/chat/          # Widget, stream UI, internals panel
+├── hooks/use-eve-chat.ts     # Eve POST + NDJSON client
+├── scripts/
+│   ├── schema.sql            # bike_faq + vector column
+│   └── seed-faq.ts           # FAQ rows + embeddings (AI Gateway)
+└── proxy.ts                  # Eve session rate limit
 ```
 
 ---
 
 ## Prerequisites
 
-- **Node 20+** (Eve scaffold targets Node 24; 20+ usually works locally)
-- **pnpm**
-- **Neon Postgres** with the `vector` extension
-- **Vercel AI Gateway** access (chat + FAQ embeddings)
-- **Stripe** test keys (optional, for checkout)
+- **Node 20+**, **pnpm**
+- **Neon Postgres** with `pgvector`
+- **Vercel AI Gateway** (chat model + FAQ embeddings)
+- **`pnpm dev`** running when running evals locally
 
 ---
 
@@ -96,43 +88,36 @@ bike-shop/
 
 Copy [`.env.example`](.env.example) to `.env.local`:
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | Yes | Neon connection string |
-| `REVALIDATE_SECRET` | Recommended | Protects `POST /api/revalidate` |
-| `NEXT_PUBLIC_SITE_URL` | For Stripe | Checkout redirect base URL |
-| `STRIPE_SECRET_KEY` | For checkout | Server-side Stripe |
+| Variable | Required for RAG | Purpose |
+|----------|------------------|---------|
+| `DATABASE_URL` | Yes | Neon — `bike_faq` table + pgvector |
 
-AI Gateway auth for Eve is handled via Vercel OIDC / local dev helpers in [`agent/channels/eve.ts`](agent/channels/eve.ts)—see [Eve docs](https://eve.dev) for linking your Vercel team locally.
+Gateway auth for Eve is via Vercel OIDC / local dev in [`agent/channels/eve.ts`](agent/channels/eve.ts). See [Eve docs](https://eve.dev) to link your Vercel team locally.
+
+Other env vars in `.env.example` (Stripe, revalidate secret) are for **Project 1** storefront/checkout only.
 
 ---
 
 ## Local setup
 
-### 1. Install and configure
+### 1. Install
 
 ```bash
 pnpm install
 cp .env.example .env.local
-# Edit .env.local — at minimum set DATABASE_URL
+# Set DATABASE_URL
 ```
 
 ### 2. Database
 
-**New database:** run [`scripts/schema.sql`](scripts/schema.sql) in the Neon SQL editor (or `psql`).
+Run [`scripts/schema.sql`](scripts/schema.sql) in Neon (creates `bike_faq` with `embedding vector`).
 
-**Existing database** (missing `model_id` / display columns): run [`scripts/migrate-catalog.sql`](scripts/migrate-catalog.sql) once, then seed.
-
-### 3. Seed data
+### 3. Seed FAQ (embeddings via AI Gateway)
 
 ```bash
-pnpm seed          # bike_stock + bike_faq (embeddings via AI Gateway)
-# or
-pnpm seed:stock    # stock only
-pnpm seed:faq      # FAQ vectors only
+pnpm seed:faq
+# or full seed (stock + FAQ): pnpm seed
 ```
-
-Catalog rows are keyed by **`model_id`** (e.g. `meridian-rd`). Marketing copy and image paths come from [`data/bike-catalog.json`](data/bike-catalog.json).
 
 ### 4. Run
 
@@ -140,7 +125,9 @@ Catalog rows are keyed by **`model_id`** (e.g. `meridian-rd`). Marketing copy an
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Chat widget is bottom-right.
+Open [http://localhost:3000](http://localhost:3000) → FAQ widget bottom-right.
+
+**Try:** “What are your UK shipping options?” · “Is VAT included?” · “Who won the World Cup?” (scope)
 
 ---
 
@@ -149,86 +136,85 @@ Open [http://localhost:3000](http://localhost:3000). Chat widget is bottom-right
 | Command | Description |
 |---------|-------------|
 | `pnpm dev` | Next.js + Eve agent |
-| `pnpm build` | Production build |
-| `pnpm start` | Production server |
-| `pnpm lint` | ESLint |
-| `pnpm seed` | Seed stock + FAQ |
-| `pnpm seed:stock` / `pnpm seed:faq` | Seed one table |
-| `pnpm eval` | Run Eve agent evals (scope + District CB price) |
+| `pnpm seed:faq` | Seed `bike_faq` + embed via Gateway |
+| `pnpm eval` | Run Eve agent evals (`scope` + District CB price) |
 
 ---
 
-## Catalog and ISR
+## Agent configuration
 
-Bike pages load from Neon through [`lib/bikes-catalog.ts`](lib/bikes-catalog.ts):
+[`agent/agent.ts`](agent/agent.ts)
 
-- **Cache tags:** `bikes` (full catalog), `bike:{modelId}` (reserved for granular invalidation)
-- **Images:** always from [`data/bike-catalog.json`](data/bike-catalog.json) + `public/bikes/` (not DB pixels)
-- **Prices/stock metadata:** from `bike_stock` via `DISTINCT ON (model_id)`
+- **Primary:** `openai/gpt-4o-mini` (cost/latency for support)
+- **Failover:** `openai/gpt-4o` → `anthropic/claude-sonnet-4` via [Gateway model fallbacks](https://vercel.com/docs/ai-gateway/models-and-providers/model-fallbacks)
 
-After changing stock in Neon or re-seeding:
+[`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) uses AI SDK:
 
-```bash
-curl -X POST "http://localhost:3000/api/revalidate?tag=bikes" \
-  -H "x-revalidate-secret: $REVALIDATE_SECRET"
+```ts
+embed({ model: gateway.embeddingModel("openai/text-embedding-3-small"), value: query })
 ```
 
-`pnpm seed:stock` calls this automatically when `REVALIDATE_SECRET` is set and the dev server is running.
-
-On Vercel, add `REVALIDATE_SECRET` to project env vars and use your production URL in the curl command (or rely on redeploy).
+Then cosine search in Neon (`<=>` operator on `bike_faq.embedding`).
 
 ---
 
-## Eve agent
+## Chat widget
 
-**Config:** [`agent/agent.ts`](agent/agent.ts)
+[`components/chat/faq-bot-launcher.tsx`](components/chat/faq-bot-launcher.tsx) composes the launcher shell; [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) handles Eve session POST + NDJSON stream. Assistant replies render as Markdown ([`components/chat/chat-assistant-message.tsx`](components/chat/chat-assistant-message.tsx)).
 
-- **Primary model:** `openai/gpt-4o-mini`
-- **Gateway failover:** `openai/gpt-4o` → `anthropic/claude-sonnet-4` if the primary fails ([Model Fallbacks](https://vercel.com/docs/ai-gateway/models-and-providers/model-fallbacks))
-
-**Skills** (loaded on demand):
-
-- `faq_guide` — policy, shipping, VAT, sizing
-- `purchase_advisor` — recommendations; must call `get_catalog` before quoting prices
-
-**Scope:** UK shop only; out-of-scope questions are redirected ([`agent/instructions.md`](agent/instructions.md)).
-
-**Chat UX:** [`components/chat/faq-bot-launcher.tsx`](components/chat/faq-bot-launcher.tsx) streams Eve events, shows a single recommended product card (not a full catalog dump), and retries once if stale session tokens fail after a dev restart.
-
----
-
-## Stripe Checkout
-
-1. Add test keys to `.env.local`
-2. Set `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
-3. Add bikes from detail pages or chat cards → **Basket** → **Pay with Stripe**
-
-Checkout line items are resolved server-side from the cached catalog ([`app/api/checkout/route.ts`](app/api/checkout/route.ts)).
+**Internals tab:** TTFT, tools called, skills loaded, session cost estimate — useful for demo / interview discussion of operability.
 
 ---
 
 ## Evaluation
 
-Evals live in [`agent/eval/`](agent/eval/). Eve discovers only a top-level `evals/` folder, so this repo symlinks **`evals` → `agent/eval`**.
-
-**Prerequisites:** `pnpm seed`, `DATABASE_URL` in `.env.local`, and **`pnpm dev` running** in another terminal.
+Evals in [`agent/eval/`](agent/eval/). Symlink **`evals` → `agent/eval`** so `eve eval` discovers them.
 
 ```bash
 pnpm dev    # terminal 1
-pnpm eval   # terminal 2 — 3 cases across 2 eval files
+pnpm eval   # terminal 2
 ```
 
 | File | What it checks |
 |------|----------------|
-| [`scope.eval.ts`](agent/eval/scope.eval.ts) | Off-topic redirect; prompt-injection refusal without leaking instructions |
-| [`district-cb-price.eval.ts`](agent/eval/district-cb-price.eval.ts) | Neon catalog matches seed; agent calls `get_catalog` and quotes **£1,450** for District CB (not £999 / £1,999 / £2,500) |
+| [`scope.eval.ts`](agent/eval/scope.eval.ts) | Off-topic redirect; prompt injection without leaking instructions |
+| [`district-cb-price.eval.ts`](agent/eval/district-cb-price.eval.ts) | Tool-use hallucination: `get_catalog` + correct District CB price (optional commerce regression) |
 
-Against a deployed app:
+Deployed target:
 
 ```bash
 pnpm exec eve eval --url https://your-app.vercel.app
 ```
 
+---
 
+## Deploy on Vercel
 
+1. Import repo; set `DATABASE_URL`
+2. Link project for AI Gateway (Eve + embeddings)
+3. Deploy — `withEve()` in [`next.config.mjs`](next.config.mjs) bundles the agent
+4. Run `pnpm seed:faq` against production Neon (or seed locally once)
 
+**Rate limiting:** [`proxy.ts`](proxy.ts) — 10 req/min/IP on Eve sessions (use Vercel KV in production).
+
+---
+
+## Code walkthrough (RAG)
+
+1. [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) — RAG retrieval (AI SDK + pgvector)
+2. [`agent/skills/faq_guide.md`](agent/skills/faq_guide.md) — context selection / similarity bands
+3. [`agent/instructions.md`](agent/instructions.md) — scope and safety
+4. [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) — streaming client
+5. [`agent/eval/scope.eval.ts`](agent/eval/scope.eval.ts) — lightweight safety eval
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Chat 401 / fails locally | Eve channel auth — localhost should pass `localDev()`; production needs `none()` for public widget |
+| “No relevant FAQ entries” | Run `pnpm seed:faq` |
+| Chat fails after dev restart | **New chat** or clear `vs_sessions` in localStorage |
+| `pnpm eval` fails | Dev server running; `DATABASE_URL` set; `pnpm seed:faq` done |
+| Embedding / Gateway errors | Link Vercel project for Gateway; check Eve docs for local OIDC |
