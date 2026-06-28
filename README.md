@@ -1,6 +1,6 @@
 # Vur Selle Bikes — RAG support assistant (AI Cloud)
 
-> **Note:** This repo is a full Solutions Architect demo. I also built **Project 1 (Frontend Cloud)** here — Next.js marketing site, Neon catalog, tag-based caching, basket, and Stripe Checkout. **This README focuses on Project 2: the RAG-based FAQ agent** (Eve, AI SDK, pgvector, evals). The chat widget lives on the same app; browse/checkout code is in the repo but not documented below.
+> **Note:** This repo is a full demo. I also built **Project 1 (Frontend Cloud)** here — Next.js marketing site, Neon catalog, tag-based caching, basket, and Stripe Checkout. **This README focuses on Project 2: the RAG-based FAQ agent** (Eve, AI SDK, pgvector, evals). The chat widget lives on the same app; browse/checkout code is in the repo but not documented below.
 
 Live demo: https://bike-shop-iota.vercel.app/ (FAQ widget, bottom-right)
 
@@ -8,15 +8,15 @@ Live demo: https://bike-shop-iota.vercel.app/ (FAQ widget, bottom-right)
 
 ## What it does
 
-A **RAG-based support assistant** for a UK bike shop: policy answers (shipping, returns, VAT, Cycle to Work, sizing) are **retrieved from Neon pgvector** before the model replies — not invented from training data.
+A **RAG-based support assistant** for a UK bike shop: policy answers (shipping, returns, VAT, Cycle to Work, sizing) are **retrieved from Neon pgvector** before the model replies, not invented from training data.
 
 | Capability | Purpose |
 |------------|---------|
 | **FAQ RAG** | `search_faq` embeds the question (AI SDK + Gateway), vector search on `bike_faq`, model summarises results |
-| **Scoped agent** | UK shop only; off-topic and prompt-injection attempts redirected ([`agent/instructions.md`](agent/instructions.md)) |
-| **Streaming chat** | Client widget → Eve `/eve/v1/session*` → NDJSON stream |
+| **Scoped agent** | Off-topic and prompt-injection attempts redirected ([`agent/instructions.md`](agent/instructions.md)) |
+| **Streaming chat** | Client widget → Eve `/eve/v1/session*` → stream |
 | **Internals panel** | Per-turn latency, tools/skills trace, rough token cost (demo observability) |
-| **Evals** | Eve evals for safety + price hallucination regression ([`agent/eval/`](agent/eval/)) |
+| **Evals** | Eve evals for safety with price hallucination regression ([`agent/eval/`](agent/eval/)) |
 
 **Outcome:** Deflect repetitive support questions with answers grounded in your FAQ, on the same Next.js deploy as the storefront.
 
@@ -188,17 +188,6 @@ pnpm exec eve eval --url https://your-app.vercel.app
 
 ---
 
-## Deploy on Vercel
-
-1. Import repo; set `DATABASE_URL`
-2. Link project for AI Gateway (Eve + embeddings)
-3. Deploy — `withEve()` in [`next.config.mjs`](next.config.mjs) bundles the agent
-4. Run `pnpm seed:faq` against production Neon (or seed locally once)
-
-**Rate limiting:** [`proxy.ts`](proxy.ts) — 10 req/min/IP on Eve sessions (use Vercel KV in production).
-
----
-
 ## Code walkthrough (RAG)
 
 1. [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) — RAG retrieval (AI SDK + pgvector)
@@ -207,14 +196,3 @@ pnpm exec eve eval --url https://your-app.vercel.app
 4. [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) — streaming client
 5. [`agent/eval/scope.eval.ts`](agent/eval/scope.eval.ts) — lightweight safety eval
 
----
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Chat 401 / fails locally | Eve channel auth — localhost should pass `localDev()`; production needs `none()` for public widget |
-| “No relevant FAQ entries” | Run `pnpm seed:faq` |
-| Chat fails after dev restart | **New chat** or clear `vs_sessions` in localStorage |
-| `pnpm eval` fails | Dev server running; `DATABASE_URL` set; `pnpm seed:faq` done |
-| Embedding / Gateway errors | Link Vercel project for Gateway; check Eve docs for local OIDC |
