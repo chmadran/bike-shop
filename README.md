@@ -1,4 +1,4 @@
-# Vur Selle Bikes — RAG support assistant (AI Cloud)
+# Vur Selle Bikes : RAG support assistant
 
 > **Note:** This repo is a full demo. I also built **Project 1 (Frontend Cloud)** here — Next.js marketing site, Neon catalog, tag-based caching, basket, and Stripe Checkout. **This README focuses on Project 2: the RAG-based FAQ agent** (Eve, AI SDK, pgvector, evals). The chat widget lives on the same app; browse/checkout code is in the repo but not documented below.
 
