@@ -6,9 +6,27 @@ Live demo: https://bike-shop-iota.vercel.app/ (FAQ widget, bottom-right)
 
 ---
 
-## What it does
+You are a bike manufacturer that just built a complimentary eshop. You have reached out to us because you would like to add a support agent. You tried to vibe code this support agent but you encountered the following issues : 
+* **Hallucinations & Isolation:** The bot hallucinated return policies and lacked real-time visibility into inventory across regional shopping points.
+* **Vendor Lock-in:** Swapping or testing new LLMs required rewriting extensive glue code.
+* **Financial & Scale Risk:** No visibility into token spend, no failover strategy for traffic spikes, and high idle-compute costs.
+* **Security Vulnerabilities:** Exposed API keys, lack of rate-limiting, and susceptibility to prompt injections.
 
-A **RAG-based support assistant** for a UK bike shop: policy answers (shipping, returns, VAT, Cycle to Work, sizing) are **retrieved from Neon pgvector** before the model replies, not invented from training data.
+---
+
+## The Solution & Architecture
+
+### 1. Context-Aware Reliability (RAG & Live Tools)
+Instead of relying on base model knowledge, we implemented a **Retrieval-Augmented Generation (RAG)** pipeline:
+* **Grounded Policy:** Internal FAQs and shipping policies are embedded and retrieved dynamically, eliminating hallucinations.
+* **Real-Time Inventory:** The agent utilizes tool-calling (Function Calling) to query live database stock, allowing users to check local availability and purchase bikes directly in the chat.
+
+### 2. Operational Resilience & Cost Control (AI Gateway + SDK)
+To solve the operational overhead, we decoupled the application layer from the LLM providers:
+* **AI SDK:** Abstracts provider-specific APIs, allowing seamless model swapping with zero glue-code changes.
+* **AI Gateway:** Introduces full observability into token spend, automatic failover routing if primary providers hit rate limits, and request caching.
+* **Fluid Compute (Vercel):** Dramatically lowers infrastructure costs by billing only on active CPU time during stream generation.
+
 
 | Capability | Purpose |
 |------------|---------|
@@ -16,9 +34,8 @@ A **RAG-based support assistant** for a UK bike shop: policy answers (shipping, 
 | **Scoped agent** | Off-topic and prompt-injection attempts redirected ([`agent/instructions.md`](agent/instructions.md)) |
 | **Streaming chat** | Client widget → Eve `/eve/v1/session*` → stream |
 | **Internals panel** | Per-turn latency, tools/skills trace, rough token cost (demo observability) |
-| **Evals** | Eve evals for safety with price hallucination regression ([`agent/eval/`](agent/eval/)) |
+| **Evals** | Eve evals for safety with price hallucination regression ([`evals/`](evals/)) |
 
-**Outcome:** Deflect repetitive support questions with answers grounded in your FAQ, on the same Next.js deploy as the storefront.
 
 ---
 
@@ -58,13 +75,12 @@ bike-shop/
 │   ├── instructions.md       # Scope + “search FAQ first”
 │   ├── channels/eve.ts       # Channel auth
 │   ├── skills/faq_guide.md   # RAG playbook
-│   ├── tools/search_faq.ts   # Embeddings + pgvector retrieval
-│   └── eval/                 # Eve evals (*.eval.ts)
-│       ├── evals.config.ts
-│       ├── scope.eval.ts
-│       ├── district-cb-price.eval.ts
-│       └── lib/
-├── evals -> agent/eval       # Symlink — Eve CLI requires evals/ at app root
+│   └── tools/search_faq.ts   # Embeddings + pgvector retrieval
+├── evals/                    # Eve evals (*.eval.ts) — discovered by `pnpm eval`
+│   ├── evals.config.ts
+│   ├── scope.eval.ts
+│   ├── district-cb-price.eval.ts
+│   └── lib/
 ├── components/chat/          # Widget, stream UI, internals panel
 ├── hooks/use-eve-chat.ts     # Eve POST + NDJSON client
 ├── scripts/
@@ -80,7 +96,7 @@ bike-shop/
 - **Node 20+**, **pnpm**
 - **Neon Postgres** with `pgvector`
 - **Vercel AI Gateway** (chat model + FAQ embeddings)
-- **`pnpm dev`** running when running evals locally
+- **`pnpm eval`** spins up a temporary local server — no need to run `pnpm dev` first
 
 ---
 
@@ -168,17 +184,16 @@ Then cosine search in Neon (`<=>` operator on `bike_faq.embedding`).
 
 ## Evaluation
 
-Evals in [`agent/eval/`](agent/eval/). Symlink **`evals` → `agent/eval`** so `eve eval` discovers them.
+Evals live in [`evals/`](evals/) at the project root (required by `eve eval`).
 
 ```bash
-pnpm dev    # terminal 1
-pnpm eval   # terminal 2
+pnpm eval
 ```
 
 | File | What it checks |
 |------|----------------|
-| [`scope.eval.ts`](agent/eval/scope.eval.ts) | Off-topic redirect; prompt injection without leaking instructions |
-| [`district-cb-price.eval.ts`](agent/eval/district-cb-price.eval.ts) | Tool-use hallucination: `get_catalog` + correct District CB price (optional commerce regression) |
+| [`scope.eval.ts`](evals/scope.eval.ts) | Off-topic redirect; prompt injection without leaking instructions |
+| [`district-cb-price.eval.ts`](evals/district-cb-price.eval.ts) | Tool-use hallucination: `get_catalog` + correct District CB price (optional commerce regression) |
 
 Deployed target:
 
@@ -186,13 +201,4 @@ Deployed target:
 pnpm exec eve eval --url https://your-app.vercel.app
 ```
 
----
-
-## Code walkthrough (RAG)
-
-1. [`agent/tools/search_faq.ts`](agent/tools/search_faq.ts) — RAG retrieval (AI SDK + pgvector)
-2. [`agent/skills/faq_guide.md`](agent/skills/faq_guide.md) — context selection / similarity bands
-3. [`agent/instructions.md`](agent/instructions.md) — scope and safety
-4. [`hooks/use-eve-chat.ts`](hooks/use-eve-chat.ts) — streaming client
-5. [`agent/eval/scope.eval.ts`](agent/eval/scope.eval.ts) — lightweight safety eval
 
