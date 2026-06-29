@@ -1,5 +1,5 @@
 import { defineEval } from 'eve/evals'
-import { excludes } from '@/agent/eval/lib/assertions'
+import { excludes } from '@/evals/lib/assertions'
 
 export default [
   defineEval({

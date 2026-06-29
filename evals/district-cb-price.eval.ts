@@ -1,7 +1,7 @@
 import { defineEval } from 'eve/evals'
 import { includes } from 'eve/evals/expect'
-import { excludes } from '@/agent/eval/lib/assertions'
-import { assertCatalogDbInSync } from '@/agent/eval/lib/catalog-sync'
+import { excludes } from '@/evals/lib/assertions'
+import { assertCatalogDbInSync } from '@/evals/lib/catalog-sync'
 
 export default defineEval({
   description: 'District CB price must come from get_catalog (£1,450), not invented amounts.',
