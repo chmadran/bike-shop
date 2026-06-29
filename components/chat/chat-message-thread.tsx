@@ -35,8 +35,7 @@ export function ChatMessageThread({ messages, status, onSend }: ChatMessageThrea
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         {messages.length === 0 && (
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Ask me anything about shipping, sizing, returns, or stock. I promise not to recommend a
-            unicycle.
+            Ask me anything about shipping, sizing, returns, or stock.
           </p>
         )}
         {messages.map((msg) => {
